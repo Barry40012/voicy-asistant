@@ -13,8 +13,19 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        
+        <!-- Font Awesome Icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        
+        <!-- AOS Animation Library -->
+        <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+        
+        <!-- Canvas Confetti Library -->
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     </head>
-    <body class="font-sans antialiased bg-gray-50">
+    <body class="font-sans antialiased bg-gray-50" x-data="{ submitted: false, showSuccess: false }" onload="AOS.init({ duration: 1000, once: true, offset: 100 })">
         <!-- Navigation -->
         <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -40,14 +51,15 @@
         </nav>
 
         <!-- Contact Section -->
-        <section class="py-20 bg-gradient-to-br from-primary-50 via-white to-secondary-50">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section class="relative py-20 bg-gradient-to-br from-green-50 via-green-100 to-green-50 overflow-hidden">
+            <!-- Animated Confetti Background -->
+            <canvas id="contact-confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;"></canvas>
+            
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <!-- Header -->
-                <div class="text-center mb-16">
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-primary-100 rounded-full mb-6">
-                        <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
+                <div class="text-center mb-16" data-aos="fade-down">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full mb-6 shadow-2xl border-4 border-white overflow-hidden">
+                        <i class="fas fa-envelope text-white text-4xl"></i>
                     </div>
                     <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Contactez-nous</h1>
                     <p class="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -55,31 +67,32 @@
                     </p>
                 </div>
 
+                <!-- Success Message with Animation -->
                 @if (session('success'))
-                    <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
-                        <div class="flex">
+                    <div class="mb-8 max-w-2xl mx-auto bg-green-50 border border-green-200 p-6 rounded-xl shadow-lg" data-aos="zoom-in" x-data="{ show: true }" x-show="show" x-transition>
+                        <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
+                                <div class="bg-green-500 rounded-full w-12 h-12 flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xl"></i>
+                                </div>
                             </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-semibold text-green-800">{{ session('success') }}</p>
+                            <div class="ml-4">
+                                <p class="text-base font-semibold text-green-800">{{ session('success') }}</p>
                             </div>
                         </div>
                     </div>
                 @endif
 
                 @if ($errors->any())
-                    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-                        <div class="flex">
+                    <div class="mb-8 max-w-2xl mx-auto bg-red-50 border border-red-200 p-6 rounded-xl shadow-lg" data-aos="shake">
+                        <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                </svg>
+                                <div class="bg-red-500 rounded-full w-12 h-12 flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                                </div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-semibold text-red-800 mb-2">Erreurs détectées</h3>
+                            <div class="ml-4 flex-1">
+                                <h3 class="text-base font-semibold text-red-800 mb-2">Erreurs détectées</h3>
                                 <ul class="text-sm text-red-700 space-y-1">
                                     @foreach ($errors->all() as $error)
                                         <li>• {{ $error }}</li>
@@ -90,14 +103,15 @@
                     </div>
                 @endif
 
-                <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100">
-                    <form method="POST" action="{{ route('contact.store') }}" class="space-y-6">
+                <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-primary-200" data-aos="fade-up">
+                    <form method="POST" action="{{ route('contact.store') }}" class="space-y-6" @submit="submitted = true" x-show="!showSuccess">
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Nom -->
                             <div>
-                                <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <label for="name" class="block text-sm font-bold text-gray-800 mb-3">
+                                    <i class="fas fa-user text-primary-600 mr-2"></i>
                                     Nom complet <span class="text-red-500">*</span>
                                 </label>
                                 <input 
@@ -106,14 +120,15 @@
                                     name="name" 
                                     value="{{ old('name', auth()->user()->name ?? '') }}"
                                     required
-                                    class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition shadow-sm hover:shadow-md bg-white"
+                                    class="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all shadow-sm hover:shadow-md bg-white text-gray-900 placeholder-gray-400"
                                     placeholder="Votre nom"
                                 >
                             </div>
 
                             <!-- Email -->
                             <div>
-                                <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <label for="email" class="block text-sm font-bold text-gray-800 mb-3">
+                                    <i class="fas fa-envelope text-primary-600 mr-2"></i>
                                     Email <span class="text-red-500">*</span>
                                 </label>
                                 <input 
@@ -122,7 +137,7 @@
                                     name="email" 
                                     value="{{ old('email', auth()->user()->email ?? '') }}"
                                     required
-                                    class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition shadow-sm hover:shadow-md bg-white"
+                                    class="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all shadow-sm hover:shadow-md bg-white text-gray-900 placeholder-gray-400"
                                     placeholder="votre@email.com"
                                 >
                             </div>
@@ -130,7 +145,8 @@
 
                         <!-- Sujet -->
                         <div>
-                            <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label for="subject" class="block text-sm font-bold text-gray-800 mb-3">
+                                <i class="fas fa-tag text-primary-600 mr-2"></i>
                                 Sujet <span class="text-red-500">*</span>
                             </label>
                             <input 
@@ -139,14 +155,15 @@
                                 name="subject" 
                                 value="{{ old('subject') }}"
                                 required
-                                class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition shadow-sm hover:shadow-md bg-white"
+                                class="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all shadow-sm hover:shadow-md bg-white text-gray-900 placeholder-gray-400"
                                 placeholder="Sujet de votre message"
                             >
                         </div>
 
                         <!-- Message -->
                         <div>
-                            <label for="message" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label for="message" class="block text-sm font-bold text-gray-800 mb-3">
+                                <i class="fas fa-comment-alt text-primary-600 mr-2"></i>
                                 Message <span class="text-red-500">*</span>
                             </label>
                             <textarea 
@@ -154,15 +171,13 @@
                                 name="message" 
                                 rows="6"
                                 required
-                                minlength="20"
-                                class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition resize-none shadow-sm hover:shadow-md bg-white"
-                                placeholder="Votre message (minimum 20 caractères)..."
+                                minlength="10"
+                                class="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 resize-none transition-all shadow-sm hover:shadow-md bg-white text-gray-900 placeholder-gray-400"
+                                placeholder="Votre message (minimum 10 caractères)..."
                             >{{ old('message') }}</textarea>
                             <p class="mt-2 text-xs text-gray-500 flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Minimum 20 caractères requis
+                                <i class="fas fa-info-circle text-primary-500 mr-1"></i>
+                                Minimum 10 caractères requis
                             </p>
                         </div>
 
@@ -170,49 +185,37 @@
                         <div class="flex justify-end pt-4">
                             <button 
                                 type="submit"
-                                class="px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                :disabled="submitted"
+                                class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white text-lg font-semibold rounded-lg hover:bg-primary-700 transition shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <span class="flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                    </svg>
+                                <span class="flex items-center justify-center" x-show="!submitted">
                                     Envoyer le message
+                                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </span>
+                                <span class="flex items-center justify-center" x-show="submitted">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Envoi en cours...
                                 </span>
                             </button>
                         </div>
                     </form>
-                </div>
 
-                <!-- Contact Info -->
-                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center border-2 border-gray-100 hover:border-primary-200 transition-all duration-200 hover:shadow-xl">
-                        <div class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-5 shadow-md">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
+                    <!-- Success Animation -->
+                    <div x-show="showSuccess" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="text-center py-12" style="display: none;">
+                        <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-6 shadow-2xl animate-bounce">
+                            <i class="fas fa-check text-white text-4xl"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">Email</h3>
-                        <p class="text-sm text-gray-600">support@voicyassistant.com</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center border-2 border-gray-100 hover:border-primary-200 transition-all duration-200 hover:shadow-xl">
-                        <div class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-5 shadow-md">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">Réponse</h3>
-                        <p class="text-sm text-gray-600">Sous 24-48h</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center border-2 border-gray-100 hover:border-primary-200 transition-all duration-200 hover:shadow-xl">
-                        <div class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-5 shadow-md">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">Support</h3>
-                        <p class="text-sm text-gray-600">7j/7 disponible</p>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">Message envoyé !</h2>
+                        <p class="text-lg text-gray-600 mb-6">Nous vous répondrons dans les plus brefs délais.</p>
+                        <a href="{{ route('welcome') }}" class="inline-flex items-center justify-center px-8 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition">
+                            <i class="fas fa-home mr-2"></i>
+                            Retour à l'accueil
+                        </a>
                     </div>
                 </div>
             </div>
@@ -255,6 +258,115 @@
                 </div>
             </div>
         </footer>
+
+        <script>
+            // Continuous animated confetti background
+            document.addEventListener('DOMContentLoaded', function() {
+                const canvas = document.getElementById('contact-confetti-canvas');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                const particles = [];
+                const particleCount = 30;
+                const colors = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5', '#0ea5e9', '#3b82f6'];
+                
+                class Particle {
+                    constructor() {
+                        this.reset();
+                        this.y = Math.random() * canvas.height;
+                    }
+                    
+                    reset() {
+                        this.x = Math.random() * canvas.width;
+                        this.y = -10;
+                        this.size = Math.random() * 5 + 2;
+                        this.speed = Math.random() * 2 + 1;
+                        this.color = colors[Math.floor(Math.random() * colors.length)];
+                        this.opacity = Math.random() * 0.5 + 0.3;
+                        this.rotation = Math.random() * 360;
+                        this.rotationSpeed = Math.random() * 2 - 1;
+                    }
+                    
+                    update() {
+                        this.y += this.speed;
+                        this.rotation += this.rotationSpeed;
+                        this.x += Math.sin(this.y * 0.01) * 0.5;
+                        
+                        if (this.y > canvas.height) {
+                            this.reset();
+                        }
+                    }
+                    
+                    draw() {
+                        ctx.save();
+                        ctx.globalAlpha = this.opacity;
+                        ctx.fillStyle = this.color;
+                        ctx.translate(this.x, this.y);
+                        ctx.rotate(this.rotation * Math.PI / 180);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+                
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle());
+                }
+                
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(particle => {
+                        particle.update();
+                        particle.draw();
+                    });
+                    requestAnimationFrame(animate);
+                }
+                
+                animate();
+                
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
+            });
+
+            // Confetti animation on successful form submission
+            @if (session('success'))
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(function() {
+                        // Confetti avec les couleurs de la plateforme
+                        confetti({
+                            particleCount: 150,
+                            spread: 80,
+                            origin: { y: 0.6 },
+                            colors: ['#0ea5e9', '#a855f7', '#10b981', '#3b82f6']
+                        });
+                        
+                        // Confetti supplémentaire après un court délai
+                        setTimeout(function() {
+                            confetti({
+                                particleCount: 100,
+                                angle: 60,
+                                spread: 55,
+                                origin: { x: 0 },
+                                colors: ['#0ea5e9', '#a855f7', '#10b981']
+                            });
+                            confetti({
+                                particleCount: 100,
+                                angle: 120,
+                                spread: 55,
+                                origin: { x: 1 },
+                                colors: ['#0ea5e9', '#a855f7', '#10b981']
+                            });
+                        }, 300);
+                    }, 500);
+                });
+            @endif
+        </script>
     </body>
 </html>
 
