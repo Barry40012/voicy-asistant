@@ -46,19 +46,25 @@ class ProcessAudioJob implements ShouldQueue
                 throw new \Exception('Failed to retrieve audio content');
             }
 
-            // Transcribe audio
-            $transcript = $aiService->transcribe($audioContent);
+            // Transcribe audio with language detection
+            $transcriptionResult = $aiService->transcribeWithLanguageDetection($audioContent);
 
-            if (!$transcript) {
+            if (!$transcriptionResult['transcript']) {
                 throw new \Exception('Transcription failed');
             }
 
-            // Analyze transcript (summary, actions, reply)
-            $analysis = $aiService->analyzeTranscript($transcript);
+            // Analyze transcript (summary, actions, reply) - adapte selon la langue détectée
+            $analysis = $aiService->analyzeTranscript(
+                $transcriptionResult['transcript'],
+                $transcriptionResult['detected_language']
+            );
 
-            // Save analysis
+            // Save analysis with language information
             $this->audio->analysis()->create([
-                'transcript' => $transcript,
+                'transcript' => $transcriptionResult['transcript'],
+                'detected_language' => $transcriptionResult['detected_language'],
+                'language_confidence' => $transcriptionResult['language_confidence'],
+                'detected_languages' => $transcriptionResult['detected_languages'],
                 'summary' => $analysis['summary'],
                 'actions' => $analysis['actions'],
                 'generated_reply' => $analysis['reply'],

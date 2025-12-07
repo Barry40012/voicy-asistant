@@ -77,6 +77,25 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'paycard',
+                'display_name' => 'Paycard',
+                'description' => 'Paiements via Paycard (Guinée) - Cartes virtuelles, Orange Money, etc.',
+                'is_active' => false,
+                'is_default' => false,
+                'environment' => 'test',
+                'credentials' => json_encode([
+                    'api_key' => '',
+                    'merchant_id' => '',
+                    'secret_key' => '',
+                    'webhook_secret' => '',
+                ]),
+                'config' => json_encode([
+                    'base_url' => 'https://api.paycard.gn',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('payment_providers')->insert($providers);
@@ -87,6 +106,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::table('payment_providers')->whereIn('name', ['flutterwave', 'stripe', 'orange', 'mtn'])->delete();
+        DB::table('payment_providers')->whereIn('name', ['flutterwave', 'stripe', 'orange', 'mtn', 'paycard'])->delete();
     }
 };

@@ -22,10 +22,14 @@ class FlutterwaveAdapter implements PaymentAdapterInterface
             ->first();
 
         if ($provider) {
-            $this->secretKey = $provider->getCredential('secret_key', '');
-            $this->publicKey = $provider->getCredential('public_key', '');
-            $this->webhookSecret = $provider->getCredential('webhook_secret', '');
-            $this->baseUrl = $provider->getConfig('base_url', 'https://api.flutterwave.com/v3');
+            $environment = $provider->environment ?? 'test';
+            $envPrefix = $environment === 'test' ? 'test_' : 'live_';
+            
+            // Charger les clés selon l'environnement
+            $this->secretKey = $provider->getCredential("{$envPrefix}secret_key") ?: $provider->getCredential('secret_key', '');
+            $this->publicKey = $provider->getCredential("{$envPrefix}public_key") ?: $provider->getCredential('public_key', '');
+            $this->webhookSecret = $provider->getCredential("{$envPrefix}webhook_secret") ?: $provider->getCredential('webhook_secret', '');
+            $this->baseUrl = $provider->getConfig('base_url', $environment === 'test' ? 'https://api.flutterwave.com/v3' : 'https://api.flutterwave.com/v3');
         } else {
             // Fallback vers config si pas dans DB
             $this->secretKey = config('payments.flutterwave.secret_key');

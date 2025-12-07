@@ -9,6 +9,7 @@ use App\Models\Log;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\PaymentProvider;
+use App\Models\AIProvider;
 use App\Models\Permission;
 use App\Models\Plan;
 use App\Models\Setting;
@@ -403,6 +404,7 @@ class AdminController extends Controller
         // Assign permissions if provided
         if (isset($validated['permissions']) && !empty($validated['permissions'])) {
             $user->permissions()->sync($validated['permissions']);
+            $user->clearPermissionsCache();
         }
 
         return redirect()->route('admin.admins')
@@ -471,9 +473,48 @@ class AdminController extends Controller
         } else {
             $user->permissions()->detach();
         }
+        $user->clearPermissionsCache();
 
         return redirect()->route('admin.admins')
             ->with('success', 'Administrateur mis à jour avec succès.');
+    }
+
+    /**
+     * Update admin permissions only
+     */
+    public function updateAdminPermissions(Request $request, User $user)
+    {
+        // Only super admins can update permissions
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Seuls les super administrateurs peuvent modifier les permissions.');
+        }
+
+        // Only admins can have permissions updated
+        if (!in_array($user->role, ['admin', 'super_admin'])) {
+            abort(404, 'Cet utilisateur n\'est pas un administrateur.');
+        }
+
+        // Cannot modify super admin permissions
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('admin.admins')
+                ->with('error', 'Les permissions des super administrateurs ne peuvent pas être modifiées.');
+        }
+
+        $validated = $request->validate([
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['exists:permissions,id'],
+        ]);
+
+        // Update permissions
+        if (isset($validated['permissions'])) {
+            $user->permissions()->sync($validated['permissions']);
+        } else {
+            $user->permissions()->detach();
+        }
+        $user->clearPermissionsCache();
+
+        return redirect()->route('admin.admins')
+            ->with('success', 'Permissions mises à jour avec succès.');
     }
 
     /**
@@ -527,7 +568,19 @@ class AdminController extends Controller
         $credentialFields = $this->getProviderCredentialFields($provider->name);
         $configFields = $this->getProviderConfigFields($provider->name);
         
-        return view('admin.payment-providers.edit', compact('provider', 'credentialFields', 'configFields'));
+        // Préparer les valeurs des credentials selon l'environnement actuel
+        $credentials = $provider->credentials ?? [];
+        $environment = $provider->environment ?? 'test';
+        
+        // Pour chaque champ, charger la valeur selon l'environnement
+        $credentialValues = [];
+        foreach ($credentialFields as $field => $fieldConfig) {
+            // Essayer d'abord la valeur spécifique à l'environnement, puis la valeur générale
+            $envKey = ($environment === 'test') ? "test_{$field}" : "live_{$field}";
+            $credentialValues[$field] = $credentials[$envKey] ?? $credentials[$field] ?? '';
+        }
+        
+        return view('admin.payment-providers.edit', compact('provider', 'credentialFields', 'configFields', 'credentialValues', 'environment'));
     }
 
     /**
@@ -546,8 +599,9 @@ class AdminController extends Controller
 
         // Ajouter les règles pour les credentials selon le provider
         $credentialFields = $this->getProviderCredentialFields($provider->name);
-        foreach ($credentialFields as $field => $label) {
-            $rules["credentials.{$field}"] = ['nullable', 'string'];
+        foreach ($credentialFields as $field => $fieldConfig) {
+            $fieldKey = is_array($fieldConfig) ? $field : $field;
+            $rules["credentials.{$fieldKey}"] = ['nullable', 'string'];
         }
 
         // Ajouter les règles pour la config
@@ -565,10 +619,23 @@ class AdminController extends Controller
         $provider->environment = $validated['environment'];
 
         // Mettre à jour les credentials
+        // Structure: credentials[field] pour l'environnement actuel
+        // On stocke séparément test et live
         $credentials = $provider->credentials ?? [];
-        foreach ($credentialFields as $field => $label) {
-            if (isset($validated['credentials'][$field])) {
-                $credentials[$field] = $validated['credentials'][$field];
+        $environment = $validated['environment']; // 'test' ou 'live'
+        
+        foreach ($credentialFields as $field => $fieldConfig) {
+            $fieldKey = is_array($fieldConfig) ? $field : $field;
+            
+            if (isset($validated['credentials'][$fieldKey]) && !empty($validated['credentials'][$fieldKey])) {
+                // Stocker selon l'environnement
+                if ($environment === 'test') {
+                    $credentials["test_{$fieldKey}"] = $validated['credentials'][$fieldKey];
+                } else {
+                    $credentials["live_{$fieldKey}"] = $validated['credentials'][$fieldKey];
+                }
+                // Garder aussi la valeur actuelle pour compatibilité
+                $credentials[$fieldKey] = $validated['credentials'][$fieldKey];
             }
         }
         $provider->credentials = $credentials;
@@ -597,29 +664,108 @@ class AdminController extends Controller
 
     /**
      * Get credential fields for a provider
+     * Returns array with structure: ['field_name' => ['label' => 'Label', 'test_label' => 'Test Label', 'live_label' => 'Live Label']]
      */
     private function getProviderCredentialFields(string $providerName): array
     {
         return match($providerName) {
             'flutterwave' => [
-                'secret_key' => 'Clé secrète',
-                'public_key' => 'Clé publique',
-                'webhook_secret' => 'Secret webhook',
+                'secret_key' => [
+                    'label' => 'Clé secrète',
+                    'test_label' => 'Clé secrète (Test)',
+                    'live_label' => 'Clé secrète (Production)',
+                    'test_placeholder' => 'FLWSECK_TEST_...',
+                    'live_placeholder' => 'FLWSECK_...',
+                ],
+                'public_key' => [
+                    'label' => 'Clé publique',
+                    'test_label' => 'Clé publique (Test)',
+                    'live_label' => 'Clé publique (Production)',
+                    'test_placeholder' => 'FLWPUBK_TEST_...',
+                    'live_placeholder' => 'FLWPUBK_...',
+                ],
+                'webhook_secret' => [
+                    'label' => 'Secret webhook',
+                    'test_label' => 'Secret webhook (Test)',
+                    'live_label' => 'Secret webhook (Production)',
+                ],
             ],
             'stripe' => [
-                'secret_key' => 'Clé secrète',
-                'public_key' => 'Clé publique',
-                'webhook_secret' => 'Secret webhook',
+                'secret_key' => [
+                    'label' => 'Clé secrète',
+                    'test_label' => 'Clé secrète (Test)',
+                    'live_label' => 'Clé secrète (Production)',
+                    'test_placeholder' => 'sk_test_...',
+                    'live_placeholder' => 'sk_live_...',
+                ],
+                'public_key' => [
+                    'label' => 'Clé publique',
+                    'test_label' => 'Clé publique (Test)',
+                    'live_label' => 'Clé publique (Production)',
+                    'test_placeholder' => 'pk_test_...',
+                    'live_placeholder' => 'pk_live_...',
+                ],
+                'webhook_secret' => [
+                    'label' => 'Secret webhook',
+                    'test_label' => 'Secret webhook (Test)',
+                    'live_label' => 'Secret webhook (Production)',
+                ],
             ],
             'orange' => [
-                'merchant_id' => 'ID Marchand',
-                'api_key' => 'Clé API',
-                'webhook_secret' => 'Secret webhook',
+                'merchant_id' => [
+                    'label' => 'ID Marchand',
+                    'test_label' => 'ID Marchand (Test)',
+                    'live_label' => 'ID Marchand (Production)',
+                ],
+                'api_key' => [
+                    'label' => 'Clé API',
+                    'test_label' => 'Clé API (Test)',
+                    'live_label' => 'Clé API (Production)',
+                ],
+                'webhook_secret' => [
+                    'label' => 'Secret webhook',
+                    'test_label' => 'Secret webhook (Test)',
+                    'live_label' => 'Secret webhook (Production)',
+                ],
             ],
             'mtn' => [
-                'subscription_key' => 'Clé d\'abonnement',
-                'api_key' => 'Clé API',
-                'webhook_secret' => 'Secret webhook',
+                'subscription_key' => [
+                    'label' => 'Clé d\'abonnement',
+                    'test_label' => 'Clé d\'abonnement (Test)',
+                    'live_label' => 'Clé d\'abonnement (Production)',
+                ],
+                'api_key' => [
+                    'label' => 'Clé API',
+                    'test_label' => 'Clé API (Test)',
+                    'live_label' => 'Clé API (Production)',
+                ],
+                'webhook_secret' => [
+                    'label' => 'Secret webhook',
+                    'test_label' => 'Secret webhook (Test)',
+                    'live_label' => 'Secret webhook (Production)',
+                ],
+            ],
+            'paycard' => [
+                'api_key' => [
+                    'label' => 'Clé API',
+                    'test_label' => 'Clé API (Test)',
+                    'live_label' => 'Clé API (Production)',
+                ],
+                'merchant_id' => [
+                    'label' => 'ID Marchand',
+                    'test_label' => 'ID Marchand (Test)',
+                    'live_label' => 'ID Marchand (Production)',
+                ],
+                'secret_key' => [
+                    'label' => 'Clé secrète',
+                    'test_label' => 'Clé secrète (Test)',
+                    'live_label' => 'Clé secrète (Production)',
+                ],
+                'webhook_secret' => [
+                    'label' => 'Secret webhook',
+                    'test_label' => 'Secret webhook (Test)',
+                    'live_label' => 'Secret webhook (Production)',
+                ],
             ],
             default => [],
         };
@@ -633,6 +779,284 @@ class AdminController extends Controller
         return match($providerName) {
             'flutterwave' => [
                 'base_url' => 'URL de base de l\'API',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * AI Providers management
+     */
+    public function aiProviders()
+    {
+        $providers = AIProvider::orderBy('is_default', 'desc')
+            ->orderBy('is_active', 'desc')
+            ->orderBy('display_name')
+            ->get();
+
+        return view('admin.ai-providers.index', compact('providers'));
+    }
+
+    /**
+     * Show edit AI provider form
+     */
+    public function editAIProvider(AIProvider $provider)
+    {
+        $credentialFields = $this->getAIProviderCredentialFields($provider->name);
+        $configFields = $this->getAIProviderConfigFields($provider->name);
+        
+        // Préparer les valeurs des credentials selon l'environnement actuel
+        $credentials = $provider->credentials ?? [];
+        $environment = $provider->environment ?? 'test';
+        
+        // Pour chaque champ, charger la valeur selon l'environnement
+        $credentialValues = [];
+        foreach ($credentialFields as $field => $fieldConfig) {
+            $fieldKey = is_array($fieldConfig) ? $field : $field;
+            $envKey = ($environment === 'test') ? "test_{$fieldKey}" : "live_{$fieldKey}";
+            $credentialValues[$fieldKey] = $credentials[$envKey] ?? $credentials[$fieldKey] ?? '';
+        }
+        
+        return view('admin.ai-providers.edit', compact('provider', 'credentialFields', 'configFields', 'credentialValues', 'environment'));
+    }
+
+    /**
+     * Update AI provider
+     */
+    public function updateAIProvider(Request $request, AIProvider $provider)
+    {
+        $rules = [
+            'display_name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'is_active' => ['boolean'],
+            'is_default' => ['boolean'],
+            'environment' => ['required', 'in:test,live'],
+        ];
+
+        // Ajouter les règles pour les credentials selon le provider
+        $credentialFields = $this->getAIProviderCredentialFields($provider->name);
+        foreach ($credentialFields as $field => $fieldConfig) {
+            $fieldKey = is_array($fieldConfig) ? $field : $field;
+            $rules["credentials.{$fieldKey}"] = ['nullable', 'string'];
+        }
+
+        // Ajouter les règles pour la config
+        $configFields = $this->getAIProviderConfigFields($provider->name);
+        foreach ($configFields as $field => $label) {
+            $rules["config.{$field}"] = ['nullable', 'string'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Mettre à jour les informations de base
+        $provider->display_name = $validated['display_name'];
+        $provider->description = $validated['description'] ?? null;
+        $provider->is_active = $request->has('is_active');
+        $provider->environment = $validated['environment'];
+
+        // Mettre à jour les credentials
+        // S'assurer que credentials est un tableau (peut être null ou string JSON)
+        $credentials = $provider->credentials;
+        if (!is_array($credentials)) {
+            // Si c'est une chaîne JSON, décoder
+            if (is_string($credentials)) {
+                $decoded = json_decode($credentials, true);
+                $credentials = is_array($decoded) ? $decoded : [];
+            } else {
+                $credentials = [];
+            }
+        }
+        $environment = $validated['environment'];
+        
+        foreach ($credentialFields as $field => $fieldConfig) {
+            $fieldKey = is_array($fieldConfig) ? $field : $field;
+            
+            if (isset($validated['credentials'][$fieldKey]) && !empty($validated['credentials'][$fieldKey])) {
+                if ($environment === 'test') {
+                    $credentials["test_{$fieldKey}"] = $validated['credentials'][$fieldKey];
+                } else {
+                    $credentials["live_{$fieldKey}"] = $validated['credentials'][$fieldKey];
+                }
+                $credentials[$fieldKey] = $validated['credentials'][$fieldKey];
+            }
+        }
+        $provider->credentials = $credentials;
+
+        // Mettre à jour la config
+        // S'assurer que config est un tableau
+        $config = $provider->config;
+        if (!is_array($config)) {
+            // Si c'est une chaîne JSON, décoder
+            if (is_string($config)) {
+                $decoded = json_decode($config, true);
+                $config = is_array($decoded) ? $decoded : [];
+            } else {
+                $config = [];
+            }
+        }
+        foreach ($configFields as $field => $label) {
+            if (isset($validated['config'][$field])) {
+                $config[$field] = $validated['config'][$field];
+            }
+        }
+        $provider->config = $config;
+
+        // Gérer le provider par défaut
+        if ($request->has('is_default') && $request->is_default) {
+            $provider->setAsDefault();
+        } else {
+            $provider->is_default = false;
+        }
+
+        $provider->save();
+
+        return redirect()->route('admin.ai-providers')
+            ->with('success', 'Provider IA mis à jour avec succès.');
+    }
+
+    /**
+     * Test AI provider connection
+     */
+    public function testAIProvider(AIProvider $provider)
+    {
+        try {
+            // Vérifier que la clé API est configurée
+            $apiKey = $provider->getCredential('api_key');
+            
+            if (empty($apiKey)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucune clé API configurée. Veuillez d\'abord configurer votre clé API.',
+                ], 400);
+            }
+            
+            // Tester la connexion selon le provider
+            if ($provider->name === 'openai') {
+                // Tester avec une requête simple à l'API OpenAI
+                // Désactiver la vérification SSL uniquement en développement local (Windows)
+                $httpClient = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => "Bearer {$apiKey}",
+                ]);
+                
+                // En production, activer la vérification SSL pour la sécurité
+                if (app()->environment('local')) {
+                    $httpClient = $httpClient->withOptions(['verify' => false]);
+                }
+                
+                $response = $httpClient->get('https://api.openai.com/v1/models');
+                
+                if ($response->successful()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => '✅ Connexion réussie ! Votre clé API OpenAI est valide.',
+                        'details' => [
+                            'provider' => $provider->display_name,
+                            'environment' => $provider->environment,
+                            'test_result' => 'Clé API valide',
+                        ],
+                    ]);
+                } else {
+                    $error = $response->json();
+                    return response()->json([
+                        'success' => false,
+                        'message' => '❌ Erreur : ' . ($error['error']['message'] ?? 'Clé API invalide ou expirée'),
+                        'details' => [
+                            'provider' => $provider->display_name,
+                            'environment' => $provider->environment,
+                        ],
+                    ], 400);
+                }
+            } elseif ($provider->name === 'huggingface') {
+                // Tester avec une requête simple à l'API HuggingFace
+                // Désactiver la vérification SSL uniquement en développement local (Windows)
+                $httpClient = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => "Bearer {$apiKey}",
+                ]);
+                
+                // En production, activer la vérification SSL pour la sécurité
+                if (app()->environment('local')) {
+                    $httpClient = $httpClient->withOptions(['verify' => false]);
+                }
+                
+                $response = $httpClient->get('https://huggingface.co/api/whoami');
+                
+                if ($response->successful()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => '✅ Connexion réussie ! Votre token HuggingFace est valide.',
+                        'details' => [
+                            'provider' => $provider->display_name,
+                            'environment' => $provider->environment,
+                            'test_result' => 'Token API valide',
+                        ],
+                    ]);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '❌ Erreur : Token API invalide ou expiré.',
+                        'details' => [
+                            'provider' => $provider->display_name,
+                            'environment' => $provider->environment,
+                        ],
+                    ], 400);
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Provider non reconnu.',
+            ], 400);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du test : ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get credential fields for AI provider
+     */
+    private function getAIProviderCredentialFields(string $providerName): array
+    {
+        return match($providerName) {
+            'openai' => [
+                'api_key' => [
+                    'label' => 'Clé API',
+                    'test_label' => 'Clé API (Test)',
+                    'live_label' => 'Clé API (Production)',
+                    'test_placeholder' => 'sk-test-...',
+                    'live_placeholder' => 'sk-...',
+                ],
+            ],
+            'huggingface' => [
+                'api_key' => [
+                    'label' => 'Token API',
+                    'test_label' => 'Token API (Test)',
+                    'live_label' => 'Token API (Production)',
+                    'test_placeholder' => 'hf_...',
+                    'live_placeholder' => 'hf_...',
+                ],
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Get config fields for AI provider
+     */
+    private function getAIProviderConfigFields(string $providerName): array
+    {
+        return match($providerName) {
+            'openai' => [
+                'whisper_api_url' => 'URL API Whisper',
+                'llm_api_url' => 'URL API LLM',
+                'llm_model' => 'Modèle LLM',
+            ],
+            'huggingface' => [
+                'whisper_api_url' => 'URL API Whisper',
+                'model_name' => 'Nom du modèle',
             ],
             default => [],
         };

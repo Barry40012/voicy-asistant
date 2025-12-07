@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\VerifyEmail;
+use App\Models\Permission;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -117,6 +118,25 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get cached permissions keys for this user
+     */
+    public function getCachedPermissionKeys(): array
+    {
+        // Super admin has all permissions
+        if ($this->isSuperAdmin()) {
+            return Permission::pluck('key')->toArray();
+        }
+
+        return cache()->remember(
+            "user_permissions_{$this->id}",
+            now()->addMinutes(30),
+            function () {
+                return $this->permissions()->pluck('key')->toArray();
+            }
+        );
+    }
+
+    /**
      * Check if user has a specific permission
      */
     public function hasPermission(string $permissionKey): bool
@@ -126,8 +146,9 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        // Check if user has the permission
-        return $this->permissions()->where('key', $permissionKey)->exists();
+        // Check if user has the permission (using cache)
+        $permissions = $this->getCachedPermissionKeys();
+        return in_array($permissionKey, $permissions);
     }
 
     /**
@@ -140,8 +161,17 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        // Check if user has any of the permissions
-        return $this->permissions()->whereIn('key', $permissionKeys)->exists();
+        // Check if user has any of the permissions (using cache)
+        $permissions = $this->getCachedPermissionKeys();
+        return !empty(array_intersect($permissionKeys, $permissions));
+    }
+
+    /**
+     * Clear permissions cache for this user
+     */
+    public function clearPermissionsCache(): void
+    {
+        cache()->forget("user_permissions_{$this->id}");
     }
 
     /**

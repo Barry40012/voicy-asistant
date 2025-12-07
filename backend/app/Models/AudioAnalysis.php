@@ -13,6 +13,9 @@ class AudioAnalysis extends Model
     protected $fillable = [
         'audio_id',
         'transcript',
+        'detected_language',
+        'language_confidence',
+        'detected_languages',
         'summary',
         'actions',
         'generated_reply',
@@ -23,6 +26,8 @@ class AudioAnalysis extends Model
     protected $casts = [
         'actions' => 'array',
         'confidence_scores' => 'array',
+        'detected_languages' => 'array',
+        'language_confidence' => 'decimal:2',
     ];
 
     /**

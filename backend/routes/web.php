@@ -82,51 +82,104 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        // Dashboard - accessible à tous les admins (même sans permission spécifique)
         Route::get('/', [AdminController::class, 'index'])->name('index');
-        Route::get('/users', [AdminController::class, 'users'])->name('users');
-        Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
-        Route::patch('/users/{user}/email', [AdminController::class, 'updateEmail'])->name('users.update-email');
-        Route::patch('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.update-password');
-        Route::get('/plans', [AdminController::class, 'plans'])->name('plans');
-        Route::get('/plans/{plan}/edit', [AdminController::class, 'editPlan'])->name('plans.edit');
-        Route::patch('/plans/{plan}', [AdminController::class, 'updatePlan'])->name('plans.update');
-        Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-        Route::post('/settings/logo', [AdminController::class, 'updateLogo'])->name('settings.logo');
-        Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
-        Route::get('/payments', [AdminController::class, 'payments'])->name('payments');
-        Route::get('/audios', [AdminController::class, 'audios'])->name('audios');
-        Route::get('/logs', [AdminController::class, 'logs'])->name('logs');
+        
+        // Users management
+        Route::middleware('permission:manage_users')->group(function () {
+            Route::get('/users', [AdminController::class, 'users'])->name('users');
+            Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
+            Route::patch('/users/{user}/email', [AdminController::class, 'updateEmail'])->name('users.update-email');
+            Route::patch('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.update-password');
+        });
+        
+        // Plans management
+        Route::middleware('permission:manage_plans')->group(function () {
+            Route::get('/plans', [AdminController::class, 'plans'])->name('plans');
+            Route::get('/plans/{plan}/edit', [AdminController::class, 'editPlan'])->name('plans.edit');
+            Route::patch('/plans/{plan}', [AdminController::class, 'updatePlan'])->name('plans.update');
+        });
+        
+        // Settings - only super admin
+        Route::middleware('permission:manage_admins')->group(function () {
+            Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+            Route::post('/settings/logo', [AdminController::class, 'updateLogo'])->name('settings.logo');
+        });
+        
+        // Subscriptions management
+        Route::middleware('permission:manage_subscriptions')->group(function () {
+            Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+        });
+        
+        // Payments management
+        Route::middleware('permission:manage_payments')->group(function () {
+            Route::get('/payments', [AdminController::class, 'payments'])->name('payments');
+        });
+        
+        // Audios management
+        Route::middleware('permission:manage_audios')->group(function () {
+            Route::get('/audios', [AdminController::class, 'audios'])->name('audios');
+        });
+        
+        // Logs - only for authorized admins
+        Route::middleware('permission:view_logs')->group(function () {
+            Route::get('/logs', [AdminController::class, 'logs'])->name('logs');
+        });
         
         // Admin management (only for super admins)
-        Route::get('/admins', [AdminController::class, 'admins'])->name('admins');
-        Route::get('/admins/create', [AdminController::class, 'createAdmin'])->name('admins.create');
-        Route::post('/admins', [AdminController::class, 'storeAdmin'])->name('admins.store');
-        Route::get('/admins/{user}/edit', [AdminController::class, 'editAdmin'])->name('admins.edit');
-        Route::patch('/admins/{user}', [AdminController::class, 'updateAdmin'])->name('admins.update');
-        Route::delete('/admins/{user}', [AdminController::class, 'deleteAdmin'])->name('admins.delete');
+        Route::middleware('permission:manage_admins')->group(function () {
+            Route::get('/admins', [AdminController::class, 'admins'])->name('admins');
+            Route::get('/admins/create', [AdminController::class, 'createAdmin'])->name('admins.create');
+            Route::post('/admins', [AdminController::class, 'storeAdmin'])->name('admins.store');
+            Route::get('/admins/{user}/edit', [AdminController::class, 'editAdmin'])->name('admins.edit');
+            Route::patch('/admins/{user}', [AdminController::class, 'updateAdmin'])->name('admins.update');
+            Route::patch('/admins/{user}/permissions', [AdminController::class, 'updateAdminPermissions'])->name('admins.update-permissions');
+            Route::delete('/admins/{user}', [AdminController::class, 'deleteAdmin'])->name('admins.delete');
+        });
         
         // Payment providers management
-        Route::get('/payment-providers', [AdminController::class, 'paymentProviders'])->name('payment-providers');
-        Route::get('/payment-providers/{provider}/edit', [AdminController::class, 'editPaymentProvider'])->name('payment-providers.edit');
-        Route::patch('/payment-providers/{provider}', [AdminController::class, 'updatePaymentProvider'])->name('payment-providers.update');
+        Route::middleware('permission:manage_payment_providers')->group(function () {
+            Route::get('/payment-providers', [AdminController::class, 'paymentProviders'])->name('payment-providers');
+            Route::get('/payment-providers/{provider}/edit', [AdminController::class, 'editPaymentProvider'])->name('payment-providers.edit');
+            Route::patch('/payment-providers/{provider}', [AdminController::class, 'updatePaymentProvider'])->name('payment-providers.update');
+        });
+        
+        // AI providers management
+        Route::middleware('permission:manage_settings')->group(function () {
+            Route::get('/ai-providers', [AdminController::class, 'aiProviders'])->name('ai-providers');
+            Route::get('/ai-providers/{provider}/edit', [AdminController::class, 'editAIProvider'])->name('ai-providers.edit');
+            Route::patch('/ai-providers/{provider}', [AdminController::class, 'updateAIProvider'])->name('ai-providers.update');
+            Route::post('/ai-providers/{provider}/test', [AdminController::class, 'testAIProvider'])->name('ai-providers.test');
+        });
         
         // Comments management
-        Route::get('/comments', [AdminController::class, 'comments'])->name('comments');
-        Route::patch('/comments/{comment}/approve', [AdminController::class, 'approveComment'])->name('comments.approve');
-        Route::patch('/comments/{comment}/reject', [AdminController::class, 'rejectComment'])->name('comments.reject');
-        Route::delete('/comments/{comment}', [AdminController::class, 'deleteComment'])->name('comments.delete');
+        Route::middleware('permission:manage_comments')->group(function () {
+            Route::get('/comments', [AdminController::class, 'comments'])->name('comments');
+            Route::patch('/comments/{comment}/approve', [AdminController::class, 'approveComment'])->name('comments.approve');
+            Route::patch('/comments/{comment}/reject', [AdminController::class, 'rejectComment'])->name('comments.reject');
+            Route::delete('/comments/{comment}', [AdminController::class, 'deleteComment'])->name('comments.delete');
+        });
         
         // Newsletter management
-        Route::get('/newsletter', [AdminController::class, 'newsletter'])->name('newsletter');
-        Route::delete('/newsletter/{subscriber}', [AdminController::class, 'deleteNewsletterSubscriber'])->name('newsletter.delete');
+        Route::middleware('permission:manage_newsletter')->group(function () {
+            Route::get('/newsletter', [AdminController::class, 'newsletter'])->name('newsletter');
+            Route::delete('/newsletter/{subscriber}', [AdminController::class, 'deleteNewsletterSubscriber'])->name('newsletter.delete');
+        });
         
         // Contact messages management
-        Route::get('/contact-messages', [AdminController::class, 'contactMessages'])->name('contact-messages');
-        Route::get('/contact-messages/{message}', [AdminController::class, 'showContactMessage'])->name('contact-messages.show');
-        Route::patch('/contact-messages/{message}/read', [AdminController::class, 'markContactMessageAsRead'])->name('contact-messages.read');
-        Route::patch('/contact-messages/{message}/archive', [AdminController::class, 'archiveContactMessage'])->name('contact-messages.archive');
-        Route::delete('/contact-messages/{message}', [AdminController::class, 'deleteContactMessage'])->name('contact-messages.delete');
+        Route::middleware('permission:manage_contact_messages')->group(function () {
+            Route::get('/contact-messages', [AdminController::class, 'contactMessages'])->name('contact-messages');
+            Route::get('/contact-messages/{message}', [AdminController::class, 'showContactMessage'])->name('contact-messages.show');
+            Route::patch('/contact-messages/{message}/read', [AdminController::class, 'markContactMessageAsRead'])->name('contact-messages.read');
+            Route::patch('/contact-messages/{message}/archive', [AdminController::class, 'archiveContactMessage'])->name('contact-messages.archive');
+            Route::delete('/contact-messages/{message}', [AdminController::class, 'deleteContactMessage'])->name('contact-messages.delete');
+        });
     });
 });
+
+// CSRF token endpoint for AJAX requests
+Route::get('/api/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+})->middleware('web');
 
 require __DIR__.'/auth.php';

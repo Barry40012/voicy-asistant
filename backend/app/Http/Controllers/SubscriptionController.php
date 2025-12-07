@@ -10,6 +10,7 @@ use App\Models\Subscription;
 use App\Services\PaymentService;
 use App\Services\PaymentAdapters\FlutterwaveAdapter;
 use App\Services\PaymentAdapters\StripeAdapter;
+use App\Services\PaymentAdapters\PaycardAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -766,6 +767,7 @@ class SubscriptionController extends Controller
         return match($providerName) {
             'flutterwave' => new FlutterwaveAdapter(),
             'stripe' => new StripeAdapter(),
+            'paycard' => new PaycardAdapter(),
             // Ajouter d'autres providers ici
             default => null,
         };

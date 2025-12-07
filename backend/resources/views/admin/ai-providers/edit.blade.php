@@ -5,9 +5,9 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-gray-900">Configurer {{ $provider->display_name }}</h2>
-                        <p class="text-sm text-gray-600 mt-1">Configurez les clés API et paramètres de ce provider</p>
+                        <p class="text-sm text-gray-600 mt-1">Configurez les clés API et paramètres de ce provider IA</p>
                     </div>
-                    <a href="{{ route('admin.payment-providers') }}" class="text-gray-500 hover:text-gray-700">
+                    <a href="{{ route('admin.ai-providers') }}" class="text-gray-500 hover:text-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('admin.payment-providers.update', $provider) }}" method="POST" class="p-6">
+            <form action="{{ route('admin.ai-providers.update', $provider) }}" method="POST" class="p-6">
                 @csrf
                 @method('PATCH')
 
@@ -198,7 +198,7 @@
 
                     <!-- Boutons -->
                     <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                        <a href="{{ route('admin.payment-providers') }}" class="px-8 py-3.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition flex items-center">
+                        <a href="{{ route('admin.ai-providers') }}" class="px-8 py-3.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
@@ -210,10 +210,50 @@
                             </svg>
                             Enregistrer les modifications
                         </button>
+                        @if($provider->getCredential('api_key'))
+                            <button type="button" onclick="testProvider({{ $provider->id }})" class="px-8 py-3.5 bg-green-50 border-2 border-green-500 text-green-700 font-bold tracking-wide rounded-lg hover:bg-green-100 transition shadow-md flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Tester la connexion
+                            </button>
+                        @endif
                     </div>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+        function testProvider(providerId) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Test en cours...';
+            button.disabled = true;
+
+            fetch(`/admin/ai-providers/${providerId}/test`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('❌ Erreur lors du test: ' + error.message);
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    </script>
 </x-admin-layout>
 
