@@ -1,0 +1,60 @@
+===========================================
+CONFIGURATION GMAIL SMTP (GRATUIT) - .env
+===========================================
+
+Ouvre : E:\Project_Voicy_Assistant\backend\.env
+
+Remplace les lignes MAIL par :
+
+===========================================
+GMAIL SMTP CONFIGURATION
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=ton_email@gmail.com
+MAIL_PASSWORD=ton_app_password_ici
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=ton_email@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+IMPORTANT
+===========================================
+
+1. MAIL_USERNAME : Ton adresse Gmail complète
+   Exemple : barryyoussouf400@gmail.com
+
+2. MAIL_PASSWORD : L'App Password (16 caractères, SANS ESPACES)
+   Exemple : abcdefghijklmnop
+   (Pas ton mot de passe Gmail normal !)
+
+3. MAIL_FROM_ADDRESS : La même adresse Gmail
+
+===========================================
+CRÉER APP PASSWORD
+===========================================
+
+1. Va sur : https://myaccount.google.com/security
+2. Active "Validation en 2 étapes" (si pas déjà fait)
+3. Va dans "Mots de passe des applications"
+4. Crée un nouveau mot de passe pour "Mail"
+5. Copie le mot de passe (16 caractères)
+
+===========================================
+APRÈS CONFIGURATION
+===========================================
+
+1. Sauvegarde le .env
+
+2. Vide le cache :
+   php artisan config:clear
+
+3. Teste l'inscription :
+   - Va sur /register
+   - Crée un compte avec un vrai email
+   - Vérifie la boîte de réception
+
+===========================================
+

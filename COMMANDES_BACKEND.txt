@@ -1,0 +1,45 @@
+===========================================
+COMMANDES BACKEND LARAVEL 10 - À EXÉCUTER DANS L'ORDRE
+===========================================
+
+1. CRÉER LE PROJET LARAVEL 10
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer create-project laravel/laravel:^10.0 . --prefer-dist
+
+2. INSTALLER BREEZE (AUTH)
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer require laravel/breeze --dev
+php artisan breeze:install blade
+
+3. INSTALLER LES PACKAGES NÉCESSAIRES
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer require supabase/supabase-php
+composer require guzzlehttp/guzzle
+composer require predis/predis
+
+4. INSTALLER NPM ET COMPILER
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+npm install
+npm run build
+
+5. CRÉER LES MIGRATIONS (après configuration .env)
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan migrate
+
+6. LANCER LE SERVEUR
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan serve
+
+===========================================
+IMPORTANT : 
+- Configure ton .env avec les credentials Supabase AVANT l'étape 5
+- Crée le bucket "audios" dans Supabase Storage AVANT l'étape 5
+- Les migrations seront créées automatiquement par le script
+===========================================
+

@@ -1,0 +1,76 @@
+===========================================
+COMMANDES COMPLÈTES - LARAVEL 10 BACKEND
+===========================================
+
+ÉTAPE 1 : CRÉER LE PROJET LARAVEL 10
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer create-project laravel/laravel:^10.0 . --prefer-dist
+
+ÉTAPE 2 : INSTALLER BREEZE (AUTH)
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer require laravel/breeze --dev
+php artisan breeze:install blade
+
+ÉTAPE 3 : INSTALLER LES PACKAGES
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer require supabase/supabase-php
+composer require guzzlehttp/guzzle
+composer require predis/predis
+
+ÉTAPE 4 : INSTALLER NPM
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+npm install
+npm run build
+
+ÉTAPE 5 : CONFIGURER .env
+-------------------------------------------
+Ouvre E:\Project_Voicy_Assistant\backend\.env
+Ajoute les variables (voir CONFIG_ENV_EXEMPLE.txt)
+
+ÉTAPE 6 : EXÉCUTER LES MIGRATIONS
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan migrate
+php artisan db:seed --class=PlanSeeder
+
+ÉTAPE 7 : ENREGISTRER LE MIDDLEWARE ADMIN
+-------------------------------------------
+Ouvre app/Http/Kernel.php
+Ajoute dans $middlewareAliases :
+'admin' => \App\Http\Middleware\AdminMiddleware::class,
+
+ÉTAPE 8 : LANCER LE SERVEUR
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan serve
+
+ÉTAPE 9 : LANCER LE WORKER (nouveau terminal)
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan queue:work
+
+===========================================
+✅ TOUT LE CODE BACKEND EST DÉJÀ CRÉÉ !
+===========================================
+
+Les fichiers suivants sont déjà prêts :
+- ✅ 8 migrations (toutes les tables)
+- ✅ 7 modèles Eloquent
+- ✅ 4 services (WhatsApp, Audio, IA, Payment)
+- ✅ 5 controllers
+- ✅ Routes web et API
+- ✅ Job ProcessAudioJob
+- ✅ Configurations (whatsapp, ai, payments)
+- ✅ Middleware Admin
+- ✅ Seeder Plans
+
+Il ne reste plus qu'à :
+1. Exécuter les commandes ci-dessus
+2. Créer les vues Blade (frontend)
+
+===========================================
+

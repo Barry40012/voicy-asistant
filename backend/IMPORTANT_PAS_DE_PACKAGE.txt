@@ -1,0 +1,49 @@
+===========================================
+⚠️ IMPORTANT : PAS BESOIN D'INSTALLER LE PACKAGE SUPABASE !
+===========================================
+
+Le code a été MODIFIÉ pour utiliser l'API REST de Supabase directement.
+On utilise Guzzle (déjà installé dans Laravel) - PAS besoin du package !
+
+===========================================
+CE QUI A ÉTÉ FAIT
+===========================================
+
+✅ AudioService.php a été modifié
+✅ Utilise Http:: (Guzzle) au lieu du package Supabase
+✅ Fonctionne avec l'API REST de Supabase
+
+===========================================
+CE QU'IL FAUT FAIRE MAINTENANT
+===========================================
+
+1. NE PAS installer le package Supabase
+2. Créer le projet Supabase sur https://supabase.com
+3. Créer le bucket "audios" dans Storage
+4. Configurer le .env avec tes credentials
+
+===========================================
+CONFIGURATION .env
+===========================================
+
+DB_CONNECTION=pgsql
+DB_HOST=db.xxxxx.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=ton_mot_de_passe
+
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_SERVICE_KEY=ton_service_role_key
+SUPABASE_BUCKET=audios
+
+===========================================
+TESTER
+===========================================
+
+php artisan migrate
+
+Si ça marche, c'est bon ! Pas besoin du package !
+
+===========================================
+

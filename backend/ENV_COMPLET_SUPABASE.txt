@@ -1,0 +1,31 @@
+===========================================
+CONFIGURATION .env COMPLÈTE - SUPABASE
+===========================================
+
+Ouvre le fichier : E:\Project_Voicy_Assistant\backend\.env
+
+Et ajoute/modifie ces lignes :
+
+===========================================
+BASE DE DONNÉES (PostgreSQL Supabase)
+===========================================
+
+DB_CONNECTION=pgsql
+DB_HOST=db.yxorlhhcmjiabbjtqlwo.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=Barrynoir400@
+
+===========================================
+SUPABASE STORAGE (pour les fichiers audio)
+===========================================
+
+SUPABASE_URL=https://yxorlhhcmjiabbjtqlwo.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4b3JsaGhjbWppYWJianRxbHdvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDQ5MDUxNywiZXhwIjoyMDgwMDY2NTE3fQ.bKOvrHFOqgm2cBGX8rSo2pB4-3DmR41CZsNZg0EBptQ
+SUPABASE_BUCKET=audios
+
+===========================================
+✅ TOUTES LES INFORMATIONS SONT LÀ !
+===========================================
+

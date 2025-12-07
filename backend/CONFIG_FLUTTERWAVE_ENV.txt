@@ -1,0 +1,72 @@
+===========================================
+CONFIGURATION FLUTTERWAVE - .env
+===========================================
+
+Ouvre : E:\Project_Voicy_Assistant\backend\.env
+
+Ajoute ces lignes à la fin du fichier :
+
+===========================================
+FLUTTERWAVE CONFIGURATION
+===========================================
+
+FLUTTERWAVE_SECRET_KEY=FLWSECK_TEST-16db5cd7bacc46c02d21424e411ed434-X
+FLUTTERWAVE_PUBLIC_KEY=FLWPUBK_TEST-88b87d5c0c4dd54abc84d0750729acbb-X
+FLUTTERWAVE_WEBHOOK_SECRET=
+FLUTTERWAVE_BASE_URL=https://api.flutterwave.com/v3
+
+===========================================
+IMPORTANT
+===========================================
+
+1. FLUTTERWAVE_SECRET_KEY :
+   - Clé secrète de test (déjà remplie)
+   - Ne la partage JAMAIS
+
+2. FLUTTERWAVE_PUBLIC_KEY :
+   - Clé publique de test (déjà remplie)
+   - Peut être utilisée côté client (mais pas nécessaire ici)
+
+3. FLUTTERWAVE_WEBHOOK_SECRET :
+   - Laisse vide pour l'instant (optionnel pour les tests)
+   - Tu le configureras plus tard si besoin
+
+4. FLUTTERWAVE_BASE_URL :
+   - URL de l'API Flutterwave (déjà remplie)
+   - Ne change pas cette valeur
+
+===========================================
+APRÈS CONFIGURATION
+===========================================
+
+1. Sauvegarde le .env
+
+2. Vide le cache Laravel :
+   php artisan config:clear
+
+3. Teste le système :
+   - Va dans Dashboard > Mon Abonnement
+   - Choisis un plan
+   - Clique sur "S'abonner avec ma carte Visa"
+   - Utilise une carte de test Flutterwave
+
+===========================================
+CARTES DE TEST FLUTTERWAVE
+===========================================
+
+Carte Visa réussie :
+- Numéro : 5531886652142950
+- CVV : 564
+- Date d'expiration : N'importe quelle date future
+- PIN : 3310
+- OTP : 123456
+
+Carte Mastercard réussie :
+- Numéro : 5399838383838381
+- CVV : 883
+- Date d'expiration : N'importe quelle date future
+- PIN : 3310
+- OTP : 123456
+
+===========================================
+

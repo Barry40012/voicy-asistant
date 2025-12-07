@@ -1,0 +1,40 @@
+===========================================
+CONFIGURATION .env - SUPABASE
+===========================================
+
+Ajoute ces lignes dans ton fichier :
+E:\Project_Voicy_Assistant\backend\.env
+
+===========================================
+BASE DE DONNÉES (PostgreSQL Supabase)
+===========================================
+
+DB_CONNECTION=pgsql
+DB_HOST=db.yxorlhhcmjiabbjtqlwo.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=TON_MOT_DE_PASSE_ICI
+
+===========================================
+SUPABASE STORAGE (pour les fichiers audio)
+===========================================
+
+SUPABASE_URL=https://yxorlhhcmjiabbjtqlwo.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4b3JsaGhjbWppYWJianRxbHdvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDQ5MDUxNywiZXhwIjoyMDgwMDY2NTE3fQ.bKOvrHFOqgm2cBGX8rSo2pB4-3DmR41CZsNZg0EBptQ
+SUPABASE_BUCKET=audios
+
+===========================================
+IMPORTANT
+===========================================
+
+1. Remplace TON_MOT_DE_PASSE_ICI par le mot de passe 
+   que tu as créé lors de la création du projet Supabase
+
+2. Vérifie que le bucket "audios" existe dans Supabase Storage
+
+3. Après avoir modifié le .env, teste avec :
+   php artisan migrate
+
+===========================================
+

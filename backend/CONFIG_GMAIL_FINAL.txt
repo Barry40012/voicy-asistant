@@ -1,0 +1,41 @@
+===========================================
+CONFIGURATION GMAIL FINALE - .env
+===========================================
+
+Ouvre : E:\Project_Voicy_Assistant\backend\.env
+
+Trouve les lignes MAIL et remplace-les par :
+
+===========================================
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=barryyoussouf400@gmail.com
+MAIL_PASSWORD=spedjbcurkdeobtn
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=barryyoussouf400@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+===========================================
+
+IMPORTANT :
+- MAIL_PASSWORD : spedjbcurkdeobtn (SANS ESPACES)
+- MAIL_USERNAME : barryyoussouf400@gmail.com
+- MAIL_FROM_ADDRESS : barryyoussouf400@gmail.com
+
+===========================================
+APRÈS CONFIGURATION
+===========================================
+
+1. Sauvegarde le fichier .env
+
+2. Vide le cache :
+   php artisan config:clear
+
+3. Teste l'inscription :
+   - Va sur http://127.0.0.1:8000/register
+   - Crée un compte avec un VRAI email (pas Gmail)
+   - Vérifie la boîte de réception de cet email
+   - Tu devrais recevoir l'email de vérification ! 📧
+
+===========================================
+

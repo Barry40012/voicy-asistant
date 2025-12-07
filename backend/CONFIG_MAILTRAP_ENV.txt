@@ -1,0 +1,37 @@
+===========================================
+CONFIGURATION MAILTRAP DANS .env
+===========================================
+
+Ouvre : E:\Project_Voicy_Assistant\backend\.env
+
+Ajoute ou modifie ces lignes :
+
+===========================================
+MAILTRAP CONFIGURATION
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=327090bf3498d3
+MAIL_PASSWORD=19c9b948132409
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@voicy-assistant.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+APRÈS CONFIGURATION
+===========================================
+
+1. Sauvegarde le fichier .env
+
+2. Vide le cache :
+   php artisan config:clear
+
+3. Teste l'inscription :
+   - Va sur http://127.0.0.1:8000/register
+   - Crée un compte
+   - Vérifie dans Mailtrap > My Sandbox > Messages
+
+===========================================
+

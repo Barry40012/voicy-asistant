@@ -1,0 +1,71 @@
+===========================================
+CONFIGURATION EMAIL - .env
+===========================================
+
+OPTION 1 : MAILTRAP (Développement - Recommandé)
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=ton_username_mailtrap
+MAIL_PASSWORD=ton_password_mailtrap
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@voicy-assistant.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+OPTION 2 : GMAIL SMTP (Production)
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=ton_email@gmail.com
+MAIL_PASSWORD=ton_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=ton_email@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+⚠️ Pour Gmail : Utilise un "App Password", pas ton mot de passe normal
+
+===========================================
+OPTION 3 : SENDGRID (Production - Recommandé)
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.sendgrid.net
+MAIL_PORT=587
+MAIL_USERNAME=apikey
+MAIL_PASSWORD=ton_api_key_sendgrid
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@voicy-assistant.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+OPTION 4 : MAILGUN (Production)
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailgun.org
+MAIL_PORT=587
+MAIL_USERNAME=ton_username_mailgun
+MAIL_PASSWORD=ton_password_mailgun
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@voicy-assistant.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+APRÈS CONFIGURATION
+===========================================
+
+1. Vide le cache :
+   php artisan config:clear
+
+2. Teste l'inscription :
+   - Va sur /register
+   - Crée un compte
+   - Vérifie ta boîte email (ou Mailtrap)
+
+===========================================
+

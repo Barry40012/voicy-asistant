@@ -1,0 +1,37 @@
+===========================================
+COMMANDES POUR VÉRIFIER PHP
+===========================================
+
+1. VÉRIFIER LA VERSION PHP
+-------------------------------------------
+php -v
+
+2. TROUVER LE FICHIER PHP.INI
+-------------------------------------------
+php --ini
+
+3. VÉRIFIER LES EXTENSIONS INSTALLÉES
+-------------------------------------------
+php -m
+
+4. VÉRIFIER SPÉCIFIQUEMENT POSTGRESQL
+-------------------------------------------
+php -m | findstr pgsql
+
+Si tu ne vois rien, l'extension n'est pas installée.
+
+===========================================
+PROCHAINES ÉTAPES
+===========================================
+
+1. Ouvre le fichier php.ini (chemin affiché par php --ini)
+2. Cherche : ;extension=pdo_pgsql
+3. Décommente (enlève le ;) : extension=pdo_pgsql
+4. Cherche : ;extension=pgsql
+5. Décommente : extension=pgsql
+6. Sauvegarde
+7. Redémarre ton serveur (si XAMPP/WAMP)
+8. Réessaie : php artisan migrate
+
+===========================================
+

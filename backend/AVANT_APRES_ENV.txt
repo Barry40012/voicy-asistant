@@ -1,0 +1,37 @@
+===========================================
+AVANT (Mailtrap) - À REMPLACER
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=327090bf3498d3
+MAIL_PASSWORD=19c9b948132409
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@voicy-assistant.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+APRÈS (Gmail) - À METTRE
+===========================================
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=barryyoussouf400@gmail.com
+MAIL_PASSWORD=spedjbcurkdeobtn
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=barryyoussouf400@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+===========================================
+ACTION
+===========================================
+
+1. Ouvre .env
+2. Trouve les lignes MAIL_*
+3. Remplace TOUTES par celles de Gmail
+4. Sauvegarde
+
+===========================================
+

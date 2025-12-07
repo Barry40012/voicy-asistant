@@ -1,0 +1,42 @@
+===========================================
+CONFIGURATION WHATSAPP - .env
+===========================================
+
+Ouvre : E:\Project_Voicy_Assistant\backend\.env
+
+Ajoute ces lignes :
+
+===========================================
+WHATSAPP CONFIGURATION
+===========================================
+
+WHATSAPP_VERIFY_TOKEN=voicy_webhook_2024_secret
+WHATSAPP_APP_SECRET=ton_app_secret_meta_ici
+
+===========================================
+IMPORTANT
+===========================================
+
+1. WHATSAPP_VERIFY_TOKEN :
+   - Génère un token aléatoire et sécurisé
+   - Exemple : voicy_webhook_2024_secret
+   - Utilise le MÊME token dans Meta Developers
+
+2. WHATSAPP_APP_SECRET :
+   - Récupère-le depuis Meta Developers
+   - Paramètres > Paramètres de base > Secret de l'application
+   - Garde-le SECRET
+
+===========================================
+APRÈS CONFIGURATION
+===========================================
+
+1. Sauvegarde le .env
+
+2. Vide le cache :
+   php artisan config:clear
+
+3. Configure le webhook dans Meta Developers
+
+===========================================
+

@@ -1,0 +1,68 @@
+===========================================
+CONFIGURATION .env - EXEMPLE
+===========================================
+
+Après avoir créé ton projet Laravel, ouvre le fichier :
+E:\Project_Voicy_Assistant\backend\.env
+
+Et modifie ces lignes :
+
+-------------------------------------------
+BASE DE DONNÉES (Supabase PostgreSQL)
+-------------------------------------------
+DB_CONNECTION=pgsql
+DB_HOST=db.xxxxx.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=ton_mot_de_passe_supabase
+
+-------------------------------------------
+SUPABASE (Storage pour les audios)
+-------------------------------------------
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_KEY=ton_anon_key_public
+SUPABASE_SERVICE_KEY=ton_service_role_key_secrete
+SUPABASE_BUCKET=audios
+
+-------------------------------------------
+QUEUE (pour traitement asynchrone)
+-------------------------------------------
+QUEUE_CONNECTION=redis
+
+-------------------------------------------
+REDIS (si tu utilises Redis local)
+-------------------------------------------
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+===========================================
+OÙ TROUVER CES INFOS DANS SUPABASE :
+===========================================
+
+1. Database URL :
+   - Settings > Database > Connection string
+   - Format : postgresql://postgres:[PASSWORD]@db.xxxxx.supabase.co:5432/postgres
+
+2. Project URL :
+   - Settings > API > Project URL
+   - Exemple : https://abcdefghijklmnop.supabase.co
+
+3. Anon Key :
+   - Settings > API > anon public
+   - (Clé publique, peut être exposée côté client)
+
+4. Service Role Key :
+   - Settings > API > service_role secret
+   - (Clé secrète, JAMAIS exposer côté client !)
+
+===========================================
+IMPORTANT :
+===========================================
+- Remplace "xxxxx" par ton vrai ID de projet Supabase
+- Le mot de passe DB est celui que tu as défini lors de la création du projet
+- Crée le bucket "audios" dans Storage avant de lancer l'app
+
+===========================================
+

@@ -1,0 +1,38 @@
+===========================================
+CONFIGURATION .env AVEC TRANSACTION POOLER
+===========================================
+
+Ouvre : E:\Project_Voicy_Assistant\backend\.env
+
+Modifie ces lignes :
+
+===========================================
+BASE DE DONNÉES (PostgreSQL Supabase - Transaction Pooler)
+===========================================
+
+DB_CONNECTION=pgsql
+DB_HOST=aws-1-eu-west-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.yxorlhhcmjiabbjtqlwo
+DB_PASSWORD=Barrynoir400@
+
+===========================================
+IMPORTANT
+===========================================
+
+1. Le hostname est : aws-1-eu-west-1.pooler.supabase.com
+2. Le port est : 6543 (pas 5432)
+3. Le username est : postgres.yxorlhhcmjiabbjtqlwo (avec le project ID)
+4. Le password reste : Barrynoir400@
+
+===========================================
+TESTER
+===========================================
+
+Après avoir modifié le .env, teste :
+
+php artisan migrate
+
+===========================================
+

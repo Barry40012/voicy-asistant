@@ -1,0 +1,87 @@
+===========================================
+COMMANDES CORRIGÉES - INSTALLATION LARAVEL 10
+===========================================
+
+PROBLÈME : Le dossier backend n'est pas vide (fichiers déjà créés)
+SOLUTION : Créer Laravel ailleurs puis fusionner
+
+===========================================
+ÉTAPE 1 : CRÉER LARAVEL DANS UN DOSSIER TEMPORAIRE
+===========================================
+cd E:\Project_Voicy_Assistant
+composer create-project laravel/laravel:^10.0 backend_temp --prefer-dist
+
+===========================================
+ÉTAPE 2 : COPIER LES FICHIERS LARAVEL DANS BACKEND
+===========================================
+xcopy /E /I /Y backend_temp\* backend\
+
+===========================================
+ÉTAPE 3 : SUPPRIMER LE DOSSIER TEMPORAIRE
+===========================================
+rmdir /S /Q backend_temp
+
+===========================================
+ÉTAPE 4 : VÉRIFIER L'INSTALLATION
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+php artisan --version
+
+===========================================
+ÉTAPE 5 : INSTALLER BREEZE
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+composer require laravel/breeze --dev
+php artisan breeze:install blade
+
+===========================================
+ÉTAPE 6 : INSTALLER LES PACKAGES
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+composer require supabase/supabase-php
+composer require guzzlehttp/guzzle
+composer require predis/predis
+
+===========================================
+ÉTAPE 7 : INSTALLER NPM
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+npm install
+npm run build
+
+===========================================
+ÉTAPE 8 : CONFIGURER .env
+===========================================
+Ouvre E:\Project_Voicy_Assistant\backend\.env
+Ajoute les variables (voir CONFIG_ENV_EXEMPLE.txt)
+
+===========================================
+ÉTAPE 9 : EXÉCUTER LES MIGRATIONS
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+php artisan migrate
+php artisan db:seed --class=PlanSeeder
+
+===========================================
+ÉTAPE 10 : ENREGISTRER LE MIDDLEWARE ADMIN
+===========================================
+Ouvre app/Http/Kernel.php
+Dans la méthode boot() ou $middlewareAliases, ajoute :
+'admin' => \App\Http\Middleware\AdminMiddleware::class,
+
+===========================================
+ÉTAPE 11 : LANCER LE SERVEUR
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+php artisan serve
+
+===========================================
+ÉTAPE 12 : LANCER LE WORKER (nouveau terminal)
+===========================================
+cd E:\Project_Voicy_Assistant\backend
+php artisan queue:work
+
+===========================================
+✅ TOUT EST PRÊT !
+===========================================
+

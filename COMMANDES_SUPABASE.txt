@@ -1,0 +1,51 @@
+===========================================
+COMMANDES SUPABASE - À EXÉCUTER
+===========================================
+
+1. INSTALLER LE PACKAGE SUPABASE
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+composer require supabase/supabase-php
+
+2. CRÉER LE PROJET SUPABASE
+-------------------------------------------
+- Va sur https://supabase.com
+- Crée un compte
+- Crée un nouveau projet
+- Note ton Project ID (xxxxx dans l'URL)
+
+3. CRÉER LE BUCKET STORAGE
+-------------------------------------------
+Dans Supabase Dashboard :
+- Storage > New bucket
+- Nom : audios
+- Public : NON (privé)
+- File size limit : 50 MB
+
+4. CONFIGURER .env
+-------------------------------------------
+Ajoute dans E:\Project_Voicy_Assistant\backend\.env :
+
+DB_CONNECTION=pgsql
+DB_HOST=db.xxxxx.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=ton_mot_de_passe
+
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_KEY=ton_anon_key
+SUPABASE_SERVICE_KEY=ton_service_role_key
+SUPABASE_BUCKET=audios
+
+5. TESTER LA CONNEXION
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan migrate
+
+Si ça marche, les tables seront créées dans Supabase !
+
+===========================================
+✅ C'EST TOUT !
+===========================================
+

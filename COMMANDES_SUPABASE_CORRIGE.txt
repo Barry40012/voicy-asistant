@@ -1,0 +1,61 @@
+===========================================
+COMMANDES SUPABASE - VERSION CORRIGÉE
+===========================================
+
+✅ BONNE NOUVELLE : Pas besoin d'installer le package Supabase !
+Le code utilise directement l'API REST de Supabase avec Guzzle.
+
+===========================================
+ÉTAPES DE CONFIGURATION
+===========================================
+
+1. CRÉER LE PROJET SUPABASE
+-------------------------------------------
+- Va sur https://supabase.com
+- Crée un compte
+- Crée un nouveau projet
+- Note ton Project ID (xxxxx dans l'URL)
+
+2. CRÉER LE BUCKET STORAGE
+-------------------------------------------
+Dans Supabase Dashboard :
+- Storage > New bucket
+- Nom : audios
+- Public : NON (privé)
+- File size limit : 50 MB
+
+3. RÉCUPÉRER LES CREDENTIALS
+-------------------------------------------
+Dans Settings > Database :
+- Connection string (pour DB)
+
+Dans Settings > API :
+- Project URL (https://xxxxx.supabase.co)
+- service_role secret (pour Storage)
+
+4. CONFIGURER .env
+-------------------------------------------
+Ajoute dans E:\Project_Voicy_Assistant\backend\.env :
+
+DB_CONNECTION=pgsql
+DB_HOST=db.xxxxx.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=ton_mot_de_passe
+
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_SERVICE_KEY=ton_service_role_key
+SUPABASE_BUCKET=audios
+
+5. TESTER LA CONNEXION
+-------------------------------------------
+cd E:\Project_Voicy_Assistant\backend
+php artisan migrate
+
+Si ça marche, les tables seront créées dans Supabase !
+
+===========================================
+✅ C'EST TOUT - PAS BESOIN D'INSTALLER DE PACKAGE !
+===========================================
+
