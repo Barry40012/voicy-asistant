@@ -1,0 +1,23 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      run: |
+        echo "🚀 Déploiement en cours..."
+        # Ajoutez ici vos commandes de déploiement (SSH, rsync, etc.)
+        
+    - name: Setup Queue Worker
+      run: |
+        echo "⚙️ Configuration du worker de queue..."
+        # Exécuter le script de déploiement sur le serveur
+        ssh user@your-server "cd /path/to/project/backend && sudo ./scripts/deploy-production.sh"
+

@@ -28,17 +28,17 @@ Route::get('/', function () {
 // Routes publiques pour commentaires, newsletter et contact
 Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{email}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard.index');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/sessions', [ProfileController::class, 'sessions'])->name('profile.sessions');
 
     // Audios
     Route::prefix('dashboard/audios')->name('dashboard.audios.')->group(function () {
@@ -68,6 +68,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/callback', [WhatsAppController::class, 'callback'])->name('callback');
         Route::post('/', [WhatsAppController::class, 'store'])->name('store');
         Route::post('/verify', [WhatsAppController::class, 'verify'])->name('verify');
+    });
+
+    // Notifications
+    Route::prefix('api/notifications')->name('notifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+        Route::get('/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount'])->name('unread-count');
+        Route::post('/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{notification}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
     });
 
     // Test role (temporaire - à supprimer après)
@@ -170,6 +179,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('permission:manage_newsletter')->group(function () {
             Route::get('/newsletter', [AdminController::class, 'newsletter'])->name('newsletter');
             Route::delete('/newsletter/{subscriber}', [AdminController::class, 'deleteNewsletterSubscriber'])->name('newsletter.delete');
+            Route::get('/newsletter/create', [AdminController::class, 'createNewsletter'])->name('newsletter.create');
+            Route::post('/newsletter/send', [AdminController::class, 'storeNewsletter'])->name('newsletter.send');
+            Route::post('/newsletter/analyze', [AdminController::class, 'analyzeNewsletterContent'])->name('newsletter.analyze');
         });
         
         // Contact messages management

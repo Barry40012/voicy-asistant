@@ -33,7 +33,10 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
+                <!-- Notifications -->
+                <x-notifications-dropdown />
+                
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -79,9 +82,17 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                        <x-dropdown-link :href="route('profile.edit')" class="flex items-center">
+                            <i class="fas fa-user-circle mr-2 text-primary-600"></i>
+                            Profil
                         </x-dropdown-link>
+                        
+                        <x-dropdown-link :href="route('profile.sessions')" class="flex items-center">
+                            <i class="fas fa-history mr-2 text-secondary-600"></i>
+                            Connexions
+                        </x-dropdown-link>
+
+                        <div class="border-t border-gray-200 my-1"></div>
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -89,16 +100,22 @@
 
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                                this.closest('form').submit();"
+                                    class="flex items-center text-red-600 hover:text-red-700">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Déconnexion
                             </x-dropdown-link>
                         </form>
                     </x-slot>
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <!-- Hamburger & Notifications Mobile -->
+            <div class="-me-2 flex items-center sm:hidden space-x-2">
+                <!-- Notifications Mobile -->
+                <x-notifications-dropdown />
+                
+                <!-- Hamburger -->
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -110,7 +127,15 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" 
+         x-show="open"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 transform -translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform -translate-y-2"
+         class="hidden sm:hidden border-t border-gray-200 bg-white shadow-lg">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
@@ -165,9 +190,17 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                <x-responsive-nav-link :href="route('profile.edit')" class="flex items-center">
+                    <i class="fas fa-user-circle mr-2 text-primary-600"></i>
+                    Profil
                 </x-responsive-nav-link>
+                
+                <x-responsive-nav-link :href="route('profile.sessions')" class="flex items-center">
+                    <i class="fas fa-history mr-2 text-secondary-600"></i>
+                    Connexions
+                </x-responsive-nav-link>
+
+                <div class="border-t border-gray-200 my-2"></div>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
@@ -175,8 +208,10 @@
 
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                                        this.closest('form').submit();"
+                            class="flex items-center text-red-600 hover:text-red-700">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Déconnexion
                     </x-responsive-nav-link>
                 </form>
             </div>

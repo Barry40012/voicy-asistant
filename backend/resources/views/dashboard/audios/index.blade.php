@@ -18,6 +18,131 @@
 
     <div class="py-8 sm:py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Advanced Search & Filters -->
+            <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-200 mb-6 p-4 sm:p-6" data-aos="fade-down">
+                <form method="GET" action="{{ route('dashboard.audios.index') }}" class="space-y-4">
+                    <!-- Search Bar -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="search" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-search mr-1 text-primary-600"></i>
+                                Recherche
+                            </label>
+                            <input type="text" 
+                                   name="search" 
+                                   id="search"
+                                   value="{{ request('search') }}"
+                                   placeholder="Rechercher par numéro, transcription ou résumé..."
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all">
+                        </div>
+                    </div>
+                    
+                    <!-- Filters Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Status Filter -->
+                        <div>
+                            <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-filter mr-1 text-primary-600"></i>
+                                Statut
+                            </label>
+                            <select name="status" 
+                                    id="status"
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all">
+                                <option value="">Tous les statuts</option>
+                                <option value="done" {{ request('status') === 'done' ? 'selected' : '' }}>Traités</option>
+                                <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>En cours</option>
+                                <option value="error" {{ request('status') === 'error' ? 'selected' : '' }}>Erreurs</option>
+                                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>En attente</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Language Filter -->
+                        <div>
+                            <label for="language" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-globe mr-1 text-primary-600"></i>
+                                Langue
+                            </label>
+                            <select name="language" 
+                                    id="language"
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all">
+                                <option value="">Toutes les langues</option>
+                                @if(isset($availableLanguages))
+                                    @foreach($availableLanguages as $lang)
+                                        <option value="{{ $lang }}" {{ request('language') === $lang ? 'selected' : '' }}>
+                                            {{ $lang === 'fr' ? 'Français' : ($lang === 'en' ? 'Anglais' : ucfirst($lang)) }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        
+                        <!-- Date From -->
+                        <div>
+                            <label for="date_from" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-1 text-primary-600"></i>
+                                Date début
+                            </label>
+                            <input type="date" 
+                                   name="date_from" 
+                                   id="date_from"
+                                   value="{{ request('date_from') }}"
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all">
+                        </div>
+                        
+                        <!-- Date To -->
+                        <div>
+                            <label for="date_to" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-1 text-primary-600"></i>
+                                Date fin
+                            </label>
+                            <input type="date" 
+                                   name="date_to" 
+                                   id="date_to"
+                                   value="{{ request('date_to') }}"
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all">
+                        </div>
+                    </div>
+                    
+                    <!-- Sort & Actions -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2 border-t border-gray-200">
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <label for="sort_by" class="block text-xs font-semibold text-gray-600 mb-1">Trier par</label>
+                                <select name="sort_by" 
+                                        id="sort_by"
+                                        class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-200 text-sm">
+                                    <option value="created_at" {{ request('sort_by', 'created_at') === 'created_at' ? 'selected' : '' }}>Date</option>
+                                    <option value="sender_phone" {{ request('sort_by') === 'sender_phone' ? 'selected' : '' }}>Numéro</option>
+                                    <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Statut</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sort_order" class="block text-xs font-semibold text-gray-600 mb-1">Ordre</label>
+                                <select name="sort_order" 
+                                        id="sort_order"
+                                        class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-200 text-sm">
+                                    <option value="desc" {{ request('sort_order', 'desc') === 'desc' ? 'selected' : '' }}>Décroissant</option>
+                                    <option value="asc" {{ request('sort_order') === 'asc' ? 'selected' : '' }}>Croissant</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('dashboard.audios.index') }}" 
+                               class="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all">
+                                <i class="fas fa-redo mr-1"></i>
+                                Réinitialiser
+                            </a>
+                            <button type="submit" 
+                                    class="px-6 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg hover:shadow-xl">
+                                <i class="fas fa-search mr-1"></i>
+                                Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
             @if($audios->count() > 0)
                 <div class="bg-white/95 backdrop-blur-sm overflow-hidden shadow-xl sm:rounded-2xl border-2 border-gray-100" data-aos="fade-up">
                     <div class="p-4 sm:p-6 lg:p-8">

@@ -347,14 +347,376 @@ class AIService
                 'reply' => null,
             ];
         } catch (\Exception $e) {
-            Log::error('Error analyzing transcript', [
+            Log::error('Error in analyzeTranscript', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
+            
             return [
                 'summary' => null,
                 'actions' => [],
                 'reply' => null,
             ];
         }
+    }
+    
+    /**
+     * Improve newsletter content using AI
+     * Améliore le sujet et le contenu d'une newsletter pour la rendre plus claire, motivante et professionnelle
+     */
+    public function improveNewsletterContent(string $subject, string $content, ?string $language = 'fr'): array
+    {
+        try {
+            // Vérifier que l'API key est configurée
+            if (empty($this->apiKey)) {
+                Log::error('Newsletter improvement: API key not configured');
+                return [
+                    'subject' => $subject,
+                    'content' => $content,
+                    'improvements' => [],
+                    'error' => 'Clé API non configurée. Veuillez configurer OpenAI dans les paramètres.',
+                ];
+            }
+            
+            // Déterminer la langue
+            $responseLanguage = $language === 'en' ? 'English' : 'Français';
+            
+            // Construire le prompt pour améliorer la newsletter
+            $prompt = $this->buildNewsletterImprovementPrompt($subject, $content, $responseLanguage);
+
+            $provider = config('ai.provider', 'openai');
+            
+            Log::info('Newsletter improvement: Sending request', [
+                'provider' => $provider,
+                'subject_length' => strlen($subject),
+                'content_length' => strlen($content),
+                'language' => $language,
+            ]);
+
+            $httpClient = Http::withHeaders([
+                'Authorization' => "Bearer {$this->apiKey}",
+                'Content-Type' => 'application/json',
+            ]);
+            
+            // Désactiver la vérification SSL uniquement en développement local
+            if (app()->environment('local')) {
+                $httpClient = $httpClient->withOptions(['verify' => false]);
+            }
+            
+            // Adapter la requête selon le provider
+            if ($provider === 'huggingface') {
+                // HuggingFace utilise un format différent
+                $fullPrompt = "Tu es un expert en rédaction de newsletters professionnelles et engageantes. Tu améliores les textes pour les rendre plus clairs, motivants, bien structurés et professionnels. Tu réponds UNIQUEMENT en JSON valide, sans markdown, sans code blocks.\n\n" . $prompt;
+                
+                $response = $httpClient->post($this->llmApiUrl, [
+                    'inputs' => $fullPrompt,
+                    'parameters' => [
+                        'max_new_tokens' => config('ai.llm_max_tokens', 2000),
+                        'temperature' => 0.3,
+                        'return_full_text' => false,
+                    ],
+                ]);
+            } else {
+                // OpenAI (format standard)
+                $response = $httpClient->post($this->llmApiUrl, [
+                    'model' => config('ai.llm_model', 'gpt-3.5-turbo'),
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => "Tu es un expert en rédaction de newsletters professionnelles et engageantes. Tu améliores les textes pour les rendre plus clairs, motivants, bien structurés et professionnels. Tu réponds UNIQUEMENT en JSON valide, sans markdown, sans code blocks, sans texte avant ou après le JSON.",
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $prompt,
+                        ],
+                    ],
+                    'temperature' => 0.3, // Plus bas pour plus de cohérence dans le format JSON
+                    'max_tokens' => config('ai.llm_max_tokens', 2000),
+                ]);
+            }
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                $provider = config('ai.provider', 'openai');
+                
+                // Adapter le parsing selon le provider
+                if ($provider === 'huggingface') {
+                    // HuggingFace retourne directement le texte généré
+                    $aiContent = $responseData[0]['generated_text'] ?? $responseData['generated_text'] ?? null;
+                    
+                    if (!$aiContent) {
+                        Log::error('Newsletter improvement: Empty content from HuggingFace', [
+                            'response' => $responseData,
+                        ]);
+                        return [
+                            'subject' => $subject,
+                            'content' => $content,
+                            'improvements' => [],
+                            'error' => 'L\'IA n\'a pas retourné de contenu.',
+                        ];
+                    }
+                } else {
+                    // OpenAI format
+                    // Vérifier la structure de la réponse
+                    if (!isset($responseData['choices']) || !isset($responseData['choices'][0])) {
+                        Log::error('Newsletter improvement: Invalid response structure', [
+                            'response' => $responseData,
+                        ]);
+                        return [
+                            'subject' => $subject,
+                            'content' => $content,
+                            'improvements' => [],
+                            'error' => 'Format de réponse invalide de l\'API.',
+                        ];
+                    }
+                    
+                    $aiContent = $responseData['choices'][0]['message']['content'] ?? null;
+                }
+                
+                if (!$aiContent) {
+                    Log::error('Newsletter improvement: Empty content from AI', [
+                        'response' => $responseData,
+                    ]);
+                    return [
+                        'subject' => $subject,
+                        'content' => $content,
+                        'improvements' => [],
+                        'error' => 'L\'IA n\'a pas retourné de contenu.',
+                    ];
+                }
+                
+                // Nettoyer le contenu (enlever markdown code blocks si présents)
+                $aiContent = trim($aiContent);
+                $aiContent = preg_replace('/^```json\s*/', '', $aiContent);
+                $aiContent = preg_replace('/^```\s*/', '', $aiContent);
+                $aiContent = preg_replace('/\s*```$/', '', $aiContent);
+                $aiContent = trim($aiContent);
+                
+                // Essayer de parser le JSON
+                $decoded = json_decode($aiContent, true);
+                
+                // Si le JSON n'est pas valide, essayer de parser le texte directement
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    Log::warning('Newsletter improvement: JSON parsing failed, trying text parsing', [
+                        'json_error' => json_last_error_msg(),
+                        'content' => substr($aiContent, 0, 200),
+                    ]);
+                    // Essayer de trouver le sujet et le contenu améliorés dans le texte
+                    return $this->parseImprovedContent($aiContent, $subject, $content);
+                }
+                
+                // Vérifier que les données essentielles sont présentes
+                if (empty($decoded['subject']) && empty($decoded['content'])) {
+                    Log::warning('Newsletter improvement: Empty decoded data', [
+                        'decoded' => $decoded,
+                    ]);
+                    // Essayer le parsing de texte en fallback
+                    return $this->parseImprovedContent($aiContent, $subject, $content);
+                }
+                
+                return [
+                    'subject' => $decoded['subject'] ?? $subject,
+                    'content' => $decoded['content'] ?? $content,
+                    'improvements' => $decoded['improvements'] ?? [],
+                ];
+            }
+
+            // Gérer les erreurs HTTP
+            $errorData = $response->json();
+            $errorMessage = $errorData['error']['message'] ?? $response->body() ?? 'Erreur inconnue';
+            
+            Log::error('Newsletter improvement failed', [
+                'status' => $response->status(),
+                'response' => $response->body(),
+                'error_data' => $errorData,
+                'error_message' => $errorMessage,
+            ]);
+
+            // Messages d'erreur plus spécifiques
+            $userMessage = 'Impossible d\'améliorer le contenu.';
+            if (strpos($errorMessage, 'quota') !== false || strpos($errorMessage, 'billing') !== false || strpos($errorMessage, 'insufficient_quota') !== false) {
+                $userMessage = 'Quota API dépassé. Vérifiez votre abonnement OpenAI ou utilisez HuggingFace comme alternative. Consultez GUIDE_QUOTA_OPENAI.md pour plus d\'informations.';
+            } elseif (strpos($errorMessage, 'invalid') !== false || strpos($errorMessage, 'key') !== false || strpos($errorMessage, 'invalid_api_key') !== false) {
+                $userMessage = 'Clé API invalide. Vérifiez votre configuration OpenAI dans /admin/ai-providers.';
+            } elseif ($response->status() === 429) {
+                $userMessage = 'Trop de requêtes. Veuillez réessayer dans quelques instants.';
+            } elseif (strpos($errorMessage, 'rate_limit') !== false) {
+                $userMessage = 'Limite de débit atteinte. Réessayez dans quelques secondes.';
+            }
+
+            return [
+                'subject' => $subject,
+                'content' => $content,
+                'improvements' => [],
+                'error' => $userMessage,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error improving newsletter content', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return [
+                'subject' => $subject,
+                'content' => $content,
+                'improvements' => [],
+                'error' => 'Erreur lors de l\'amélioration: ' . $e->getMessage(),
+            ];
+        }
+    }
+    
+    /**
+     * Build prompt for newsletter improvement
+     */
+    private function buildNewsletterImprovementPrompt(string $subject, string $content, string $language): string
+    {
+        $langInstructions = $language === 'English' 
+            ? 'Respond in English. Make the text clear, engaging, professional, and well-structured.'
+            : 'Réponds en français. Rends le texte plus clair, motivant, professionnel et bien structuré.';
+        
+        return <<<PROMPT
+Tu es un expert en rédaction de newsletters professionnelles. Améliore le sujet et le contenu de cette newsletter pour la rendre plus claire, motivante, bien structurée et professionnelle.
+
+Sujet actuel: {$subject}
+
+Contenu actuel:
+{$content}
+
+Instructions:
+- Améliore le sujet pour qu'il soit accrocheur et clair
+- Améliore le contenu pour qu'il soit bien structuré, motivant et professionnel
+- Utilise du HTML pour formater le texte (titres, listes, paragraphes)
+- Garde le même message principal mais améliore la présentation
+- Rends le texte plus engageant et actionnable
+- Assure-toi que le texte est bien organisé avec des sections claires
+
+{$langInstructions}
+
+IMPORTANT: Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans code blocks, sans texte avant ou après. Format exact:
+{"subject": "Sujet amélioré", "content": "Contenu amélioré en HTML", "improvements": ["Amélioration 1", "Amélioration 2"]}
+PROMPT;
+    }
+    
+    /**
+     * Parse improved content from AI response if JSON parsing fails
+     */
+    private function parseImprovedContent(string $aiResponse, string $originalSubject, string $originalContent): array
+    {
+        // Essayer d'extraire le JSON du texte (peut être entouré de markdown ou autre)
+        // Chercher des blocs JSON entre accolades
+        if (preg_match('/\{[^{}]*"subject"[^{}]*\}/s', $aiResponse, $matches)) {
+            $jsonStr = $matches[0];
+            $decoded = json_decode($jsonStr, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($decoded['subject'])) {
+                return [
+                    'subject' => $decoded['subject'] ?? $originalSubject,
+                    'content' => $decoded['content'] ?? $originalContent,
+                    'improvements' => $decoded['improvements'] ?? [],
+                ];
+            }
+        }
+        
+        // Essayer d'extraire le sujet et le contenu du texte
+        $lines = explode("\n", $aiResponse);
+        $improvedSubject = $originalSubject;
+        $improvedContent = $originalContent;
+        $improvements = [];
+        $inContent = false;
+        $contentLines = [];
+        
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+            
+            // Chercher le sujet
+            if ((stripos($line, 'sujet') !== false || stripos($line, 'subject') !== false) && 
+                (stripos($line, ':') !== false || stripos($line, '-') !== false)) {
+                $improvedSubject = preg_replace('/.*(?:sujet|subject)[:\-]\s*/i', '', $line);
+                $improvedSubject = trim($improvedSubject, ' "\'');
+                continue;
+            }
+            
+            // Chercher le contenu
+            if (stripos($line, 'contenu') !== false || stripos($line, 'content') !== false) {
+                $inContent = true;
+                continue;
+            }
+            
+            if ($inContent || count($contentLines) > 0) {
+                $contentLines[] = $line;
+            }
+        }
+        
+        // Si on a trouvé du contenu, l'utiliser
+        if (!empty($contentLines)) {
+            $improvedContent = implode("\n", $contentLines);
+        } else {
+            // Sinon, utiliser toute la réponse comme contenu amélioré
+            $improvedContent = $aiResponse;
+        }
+        
+        // Nettoyer le contenu (enlever les balises markdown si présentes)
+        $improvedContent = preg_replace('/```json\s*/', '', $improvedContent);
+        $improvedContent = preg_replace('/```\s*/', '', $improvedContent);
+        $improvedContent = trim($improvedContent);
+        
+        return [
+            'subject' => $improvedSubject ?: $originalSubject,
+            'content' => $improvedContent ?: $originalContent,
+            'improvements' => $improvements,
+        ];
+    }
+    
+    /**
+     * Get response language helper
+     */
+    private function getResponseLanguage(?string $detectedLanguage): string
+    {
+        if ($detectedLanguage === 'en') {
+            return 'English';
+        }
+        return 'Français'; // Par défaut en français
+    }
+    
+    /**
+     * Build analysis prompt
+     */
+    private function buildAnalysisPrompt(string $transcript, string $responseLanguage): string
+    {
+        if ($responseLanguage === 'English') {
+            return <<<PROMPT
+Analyze this audio transcript and provide:
+1. A clear summary of the main points
+2. Action items or tasks mentioned
+3. A professional reply suggestion
+
+Transcript:
+{$transcript}
+
+Respond in JSON format:
+{
+    "summary": "Brief summary",
+    "actions": ["action1", "action2"],
+    "reply": "Suggested reply"
+}
+PROMPT;
+        }
+        
+        return <<<PROMPT
+Analyse cette transcription audio et fournis :
+1. Un résumé clair des points principaux
+2. Les actions ou tâches mentionnées
+3. Une suggestion de réponse professionnelle
+
+Transcription :
+{$transcript}
+
+Réponds en format JSON :
+{
+    "summary": "Résumé bref",
+    "actions": ["action1", "action2"],
+    "reply": "Réponse suggérée"
+}
+PROMPT;
     }
 }

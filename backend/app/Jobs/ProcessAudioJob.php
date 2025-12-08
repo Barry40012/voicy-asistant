@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Audio;
 use App\Services\AIService;
 use App\Services\AudioService;
+use App\Services\NotificationService;
 use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -33,7 +34,8 @@ class ProcessAudioJob implements ShouldQueue
     public function handle(
         AIService $aiService,
         AudioService $audioService,
-        WhatsAppService $whatsappService
+        WhatsAppService $whatsappService,
+        NotificationService $notificationService
     ): void {
         try {
             // Update status to processing
@@ -77,6 +79,9 @@ class ProcessAudioJob implements ShouldQueue
                 'processed_at' => now(),
             ]);
 
+            // Create notification for user
+            $notificationService->notifyAudioProcessed($this->audio->user, $this->audio);
+
             // Auto-reply if enabled (check user settings)
             // TODO: Implement auto-reply logic based on user preferences
 
@@ -97,8 +102,10 @@ class ProcessAudioJob implements ShouldQueue
                 'error_message' => $e->getMessage() . ' (Fichier: ' . basename($e->getFile()) . ', Ligne: ' . $e->getLine() . ')',
             ]);
 
-            // Ne pas relancer le job si on a déjà essayé plusieurs fois
+            // Create error notification for user (only on final attempt)
             if ($this->attempts() >= $this->tries) {
+                $notificationService = app(NotificationService::class);
+                $notificationService->notifyAudioError($this->audio->user, $this->audio, $e->getMessage());
                 return; // Arrêter les tentatives
             }
 

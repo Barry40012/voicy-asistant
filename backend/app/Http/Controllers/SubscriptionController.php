@@ -151,6 +151,10 @@ class SubscriptionController extends Controller
                     'plan' => $subscription->plan->name,
                 ]);
 
+                // Create notification
+                $notificationService = app(\App\Services\NotificationService::class);
+                $notificationService->notifyPaymentSuccess($payment->user, $subscription);
+
                 // Envoyer l'email de reçu
                 try {
                     $payment->load('user');
@@ -407,6 +411,10 @@ class SubscriptionController extends Controller
                     'user_id' => Auth::id(),
                 ]);
 
+                // Create notification
+                $notificationService = app(\App\Services\NotificationService::class);
+                $notificationService->notifyPaymentSuccess(Auth::user(), $subscription);
+
                 // Envoyer l'email de reçu
                 try {
                     $payment->load('user');
@@ -446,6 +454,10 @@ class SubscriptionController extends Controller
                 'expires_at' => now()->addMonth(),
                 'status' => 'active',
             ]);
+
+            // Create notification for free plan
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyPaymentSuccess(Auth::user(), $subscription);
 
             Log::info('Free subscription activated', [
                 'user_id' => Auth::id(),
@@ -724,6 +736,10 @@ class SubscriptionController extends Controller
                     $payment->load('user');
                     $subscription->load('plan');
                     
+                    // Create notification
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->notifyPaymentSuccess($subscription->user, $subscription);
+                    
                     // Envoyer l'email de reçu
                     try {
                         Mail::to($payment->user->email)->send(new PaymentReceiptMail($payment, $subscription));
@@ -893,10 +909,16 @@ class SubscriptionController extends Controller
                         'expires_at' => $newExpiresAt,
                     ]);
                     
+                    // Recharger les relations
+                    $payment->load('user');
+                    $subscription->load('plan');
+                    
+                    // Create notification
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->notifyPaymentSuccess($subscription->user, $subscription);
+                    
                     // Envoyer l'email de reçu
                     try {
-                        $payment->load('user');
-                        $subscription->load('plan');
                         Mail::to($payment->user->email)->send(new PaymentReceiptMail($payment, $subscription));
                     } catch (\Exception $e) {
                         Log::error('Failed to send payment receipt email', [

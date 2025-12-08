@@ -347,7 +347,115 @@
                             </div>
                         </div>
                     </div>
-
+                    
+                    <!-- Analytics Section -->
+                    @if(isset($totalAudios) && $totalAudios > 0)
+                    <div class="mb-8 bg-white rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden" data-aos="fade-up">
+                        <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-6 py-4">
+                            <h3 class="text-xl font-bold text-white flex items-center">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Analytics & Statistiques
+                            </h3>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- Stats Overview -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
+                                    <p class="text-xs text-blue-700 font-semibold mb-1">Total d'audios</p>
+                                    <p class="text-2xl font-bold text-blue-900">{{ $totalAudios }}</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border-2 border-green-200">
+                                    <p class="text-xs text-green-700 font-semibold mb-1">Traités</p>
+                                    <p class="text-2xl font-bold text-green-900">{{ $processedAudios }}</p>
+                                    <p class="text-xs text-green-600 mt-1">{{ $successRate }}% succès</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 border-2 border-yellow-200">
+                                    <p class="text-xs text-yellow-700 font-semibold mb-1">En cours</p>
+                                    <p class="text-2xl font-bold text-yellow-900">{{ $processingAudios }}</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 border-2 border-red-200">
+                                    <p class="text-xs text-red-700 font-semibold mb-1">Erreurs</p>
+                                    <p class="text-2xl font-bold text-red-900">{{ $errorAudios }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Charts Grid -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <!-- Chart 1: Audios par jour (30 derniers jours) -->
+                                <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                                    <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                        <i class="fas fa-calendar-day mr-2 text-primary-600"></i>
+                                        Activité (30 derniers jours)
+                                    </h4>
+                                    <div style="height: 150px; position: relative;">
+                                        <canvas id="audiosByDayChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Chart 2: Répartition par statut -->
+                                <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                                    <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                        <i class="fas fa-pie-chart mr-2 text-secondary-600"></i>
+                                        Répartition par statut
+                                    </h4>
+                                    <div style="height: 150px; position: relative;">
+                                        <canvas id="audiosByStatusChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Chart 3: Langues détectées -->
+                                @if(!empty($languagesDetected))
+                                <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                                    <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                        <i class="fas fa-globe mr-2 text-green-600"></i>
+                                        Langues détectées
+                                    </h4>
+                                    <div style="height: 150px; position: relative;">
+                                        <canvas id="languagesChart"></canvas>
+                                    </div>
+                                </div>
+                                @endif
+                                
+                                <!-- Top Senders -->
+                                @if($topSenders->count() > 0)
+                                <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                                    <h4 class="text-sm font-bold text-gray-700 mb-4 flex items-center">
+                                        <i class="fas fa-users mr-2 text-primary-600"></i>
+                                        Top expéditeurs
+                                    </h4>
+                                    <div class="space-y-2">
+                                        @foreach($topSenders->take(5) as $sender)
+                                        <div class="flex items-center justify-between bg-white rounded-lg p-3 border border-gray-200">
+                                            <div class="flex items-center">
+                                                <div class="bg-primary-100 rounded-full p-2 mr-3">
+                                                    <i class="fas fa-phone text-primary-600 text-xs"></i>
+                                                </div>
+                                                <span class="text-sm font-semibold text-gray-700">{{ $sender['phone'] }}</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-primary-600">{{ $sender['count'] }} {{ $sender['count'] > 1 ? 'audios' : 'audio' }}</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            
+                            <!-- Additional Stats -->
+                            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
+                                    <p class="text-xs text-purple-700 font-semibold mb-1">Temps moyen de traitement</p>
+                                    <p class="text-xl font-bold text-purple-900">{{ $avgProcessingTimeMinutes }} minutes</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border-2 border-indigo-200">
+                                    <p class="text-xs text-indigo-700 font-semibold mb-1">Taux de succès</p>
+                                    <p class="text-xl font-bold text-indigo-900">{{ $successRate }}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    
                     <!-- Actions rapides -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Connecter WhatsApp -->
@@ -419,5 +527,170 @@
             });
         @endif
     </script>
+    
+    @if(isset($totalAudios) && $totalAudios > 0)
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        // Chart 1: Audios par jour
+        @if(isset($audiosByDay) && !empty($audiosByDay))
+        const audiosByDayCtx = document.getElementById('audiosByDayChart');
+        if (audiosByDayCtx) {
+            const audiosByDayData = @json($audiosByDay);
+            const labels = Object.keys(audiosByDayData);
+            const data = Object.values(audiosByDayData);
+            
+            new Chart(audiosByDayCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Audios reçus',
+                        data: data,
+                        borderColor: 'rgb(14, 165, 233)',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        @endif
+        
+        // Chart 2: Répartition par statut
+        @if(isset($audiosByStatus) && !empty($audiosByStatus))
+        const audiosByStatusCtx = document.getElementById('audiosByStatusChart');
+        if (audiosByStatusCtx) {
+            const statusData = @json($audiosByStatus);
+            const statusLabels = Object.keys(statusData).map(s => {
+                const labels = {
+                    'done': 'Traités',
+                    'processing': 'En cours',
+                    'error': 'Erreurs',
+                    'pending': 'En attente'
+                };
+                return labels[s] || s;
+            });
+            const statusValues = Object.values(statusData);
+            const statusColors = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
+            
+            new Chart(audiosByStatusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: statusColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 11
+                                },
+                                padding: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        @endif
+        
+        // Chart 3: Langues détectées
+        @if(isset($languagesDetected) && !empty($languagesDetected))
+        const languagesCtx = document.getElementById('languagesChart');
+        if (languagesCtx) {
+            const langData = @json($languagesDetected);
+            const langLabels = Object.keys(langData);
+            const langValues = Object.values(langData);
+            
+            new Chart(languagesCtx, {
+                type: 'bar',
+                data: {
+                    labels: langLabels,
+                    datasets: [{
+                        label: 'Audios',
+                        data: langValues,
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 1,
+                        barThickness: 30,
+                        barThickness: 30
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        @endif
+    </script>
+    @endif
 </x-app-layout>
 
