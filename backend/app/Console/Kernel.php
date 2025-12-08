@@ -12,7 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Vérifier que le worker de queue est actif toutes les 5 minutes (production uniquement)
+        if (app()->environment('production')) {
+            $schedule->command('queue:check-worker')
+                ->everyFiveMinutes()
+                ->withoutOverlapping()
+                ->runInBackground();
+        }
     }
 
     /**

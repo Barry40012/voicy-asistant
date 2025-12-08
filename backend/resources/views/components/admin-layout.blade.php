@@ -126,11 +126,17 @@
 
                     <!-- Newsletter -->
                     @if($isSuperAdmin || $user->hasPermission('manage_newsletter'))
-                        <a href="{{ route('admin.newsletter') }}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.newsletter*') ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-600' : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600' }}">
-                            <svg class="w-5 h-5 mr-3 flex-shrink-0 {{ request()->routeIs('admin.newsletter*') ? 'text-primary-600' : 'text-gray-400 group-hover:text-primary-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('admin.newsletter') }}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.newsletter*') && !request()->routeIs('admin.newsletter.create') ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-600' : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0 {{ request()->routeIs('admin.newsletter*') && !request()->routeIs('admin.newsletter.create') ? 'text-primary-600' : 'text-gray-400 group-hover:text-primary-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
-                            <span class="font-medium">Newsletter</span>
+                            <span class="font-medium">Abonnés Newsletter</span>
+                        </a>
+                        <a href="{{ route('admin.newsletter.create') }}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.newsletter.create') ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-600' : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0 {{ request()->routeIs('admin.newsletter.create') ? 'text-primary-600' : 'text-gray-400 group-hover:text-primary-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                            <span class="font-medium">Envoyer Newsletter</span>
                         </a>
                     @endif
 

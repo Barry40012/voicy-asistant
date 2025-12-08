@@ -29,6 +29,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Create login notification (only once per day to avoid spam)
+        $user = Auth::user();
+        $today = now()->startOfDay();
+        $hasNotificationToday = $user->notifications()
+            ->where('type', 'login_success')
+            ->where('created_at', '>=', $today)
+            ->exists();
+
+        if (!$hasNotificationToday) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyLogin($user, $request->ip());
+        }
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

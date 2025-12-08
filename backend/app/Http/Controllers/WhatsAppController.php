@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\WhatsAppConnection;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -42,6 +43,10 @@ class WhatsAppController extends Controller
                 'webhook_verified' => false,
             ]
         );
+
+        // Create notification
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyWhatsAppConnected(Auth::user(), $connection);
 
         return redirect()->route('dashboard.whatsapp.index')
             ->with('success', 'Connexion WhatsApp enregistrée avec succès !');
@@ -151,6 +156,10 @@ class WhatsAppController extends Controller
 
             // Try to configure webhook automatically
             $this->configureWebhook($connection, $accessToken);
+
+            // Create notification
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyWhatsAppConnected(Auth::user(), $connection);
 
             return redirect()->route('dashboard.whatsapp.index')
                 ->with('success', 'WhatsApp Business connecté avec succès ! 🎉');

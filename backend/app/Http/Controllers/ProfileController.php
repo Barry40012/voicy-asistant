@@ -57,4 +57,19 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Show user sessions (connexions)
+     */
+    public function sessions(): View
+    {
+        // Get recent login notifications as sessions
+        $sessions = \App\Models\UserNotification::where('user_id', auth()->id())
+            ->where('type', 'login_success')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return view('profile.sessions', compact('sessions'));
+    }
 }

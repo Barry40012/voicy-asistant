@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\ContactMessage;
 use App\Models\Log;
 use App\Models\NewsletterSubscriber;
+use App\Models\Newsletter;
 use App\Models\Payment;
 use App\Models\PaymentProvider;
 use App\Models\AIProvider;
@@ -955,6 +956,16 @@ class AdminController extends Controller
             // Vérifier que la clé API est configurée
             $apiKey = $provider->getCredential('api_key');
             
+            // Log pour débogage
+            \Log::info('Testing AI Provider', [
+                'provider' => $provider->name,
+                'environment' => $provider->environment,
+                'has_api_key' => !empty($apiKey),
+                'api_key_length' => strlen($apiKey ?? ''),
+                'api_key_prefix' => substr($apiKey ?? '', 0, 10) . '...',
+                'credentials_keys' => array_keys($provider->credentials ?? []),
+            ]);
+            
             if (empty($apiKey)) {
                 return response()->json([
                     'success' => false,
@@ -999,10 +1010,54 @@ class AdminController extends Controller
                     ], 400);
                 }
             } elseif ($provider->name === 'huggingface') {
+                // Nettoyer le token (enlever les espaces)
+                $apiKey = trim($apiKey);
+                
+                // Vérifier le format du token
+                if (!str_starts_with($apiKey, 'hf_')) {
+                    \Log::error('HuggingFace token format invalid', [
+                        'token_prefix' => substr($apiKey, 0, 10),
+                        'token_length' => strlen($apiKey),
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => '❌ Erreur : Le token doit commencer par "hf_". Vérifiez que vous avez copié le token complet.',
+                        'details' => [
+                            'provider' => $provider->display_name,
+                            'environment' => $provider->environment,
+                            'hint' => 'Le token HuggingFace commence toujours par "hf_" suivi de caractères alphanumériques.',
+                        ],
+                    ], 400);
+                }
+                
+                // Vérifier la longueur du token
+                if (strlen($apiKey) < 20) {
+                    \Log::error('HuggingFace token too short', [
+                        'token_length' => strlen($apiKey),
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => '❌ Erreur : Le token semble incomplet. Un token HuggingFace fait généralement 40-50 caractères.',
+                        'details' => [
+                            'provider' => $provider->display_name,
+                            'environment' => $provider->environment,
+                            'token_length' => strlen($apiKey),
+                            'hint' => 'Vérifiez que vous avez copié le token complet depuis HuggingFace.',
+                        ],
+                    ], 400);
+                }
+                
+                \Log::info('Testing HuggingFace token', [
+                    'token_prefix' => substr($apiKey, 0, 10) . '...',
+                    'token_length' => strlen($apiKey),
+                    'token_ends_with' => '...' . substr($apiKey, -5),
+                ]);
+                
                 // Tester avec une requête simple à l'API HuggingFace
                 // Désactiver la vérification SSL uniquement en développement local (Windows)
                 $httpClient = \Illuminate\Support\Facades\Http::withHeaders([
                     'Authorization' => "Bearer {$apiKey}",
+                    'Content-Type' => 'application/json',
                 ]);
                 
                 // En production, activer la vérification SSL pour la sécurité
@@ -1010,9 +1065,51 @@ class AdminController extends Controller
                     $httpClient = $httpClient->withOptions(['verify' => false]);
                 }
                 
+                // Tester d'abord avec l'endpoint whoami pour vérifier le token
                 $response = $httpClient->get('https://huggingface.co/api/whoami');
                 
+                // Si whoami échoue, essayer avec l'API Inference (certains tokens READ ne fonctionnent qu'avec Inference)
+                if (!$response->successful() && $response->status() === 401) {
+                    \Log::info('HuggingFace whoami failed, trying Inference API', [
+                        'status' => $response->status(),
+                    ]);
+                    
+                    // Tester avec l'API Inference directement
+                    // Essayer plusieurs URLs car HuggingFace a changé son API
+                    $inferenceUrls = [
+                        'https://api-inference.huggingface.co/models/bert-base-uncased',
+                        'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
+                    ];
+                    
+                    foreach ($inferenceUrls as $inferenceUrl) {
+                        $inferenceResponse = $httpClient->timeout(10)->post($inferenceUrl, [
+                            'inputs' => 'test',
+                        ]);
+                        
+                        // 200 = succès, 503 = modèle en chargement (mais token valide), 401 = token invalide, 410 = URL obsolète
+                        if ($inferenceResponse->status() === 200 || $inferenceResponse->status() === 503) {
+                            return response()->json([
+                                'success' => true,
+                                'message' => '✅ Connexion réussie ! Votre token HuggingFace est valide.',
+                                'details' => [
+                                    'provider' => $provider->display_name,
+                                    'environment' => $provider->environment,
+                                    'test_result' => 'Token API valide (testé via Inference API)',
+                                    'note' => 'Le token fonctionne avec l\'API Inference.',
+                                ],
+                            ]);
+                        } elseif ($inferenceResponse->status() === 410) {
+                            // URL obsolète, continuer avec la suivante
+                            continue;
+                        } elseif ($inferenceResponse->status() === 401) {
+                            // Token invalide, arrêter les tests
+                            break;
+                        }
+                    }
+                }
+                
                 if ($response->successful()) {
+                    $userData = $response->json();
                     return response()->json([
                         'success' => true,
                         'message' => '✅ Connexion réussie ! Votre token HuggingFace est valide.',
@@ -1020,15 +1117,40 @@ class AdminController extends Controller
                             'provider' => $provider->display_name,
                             'environment' => $provider->environment,
                             'test_result' => 'Token API valide',
+                            'user' => $userData['name'] ?? 'Utilisateur inconnu',
                         ],
                     ]);
                 } else {
+                    $errorBody = $response->body();
+                    $errorData = $response->json();
+                    $statusCode = $response->status();
+                    
+                    \Log::error('HuggingFace test failed', [
+                        'status' => $statusCode,
+                        'response' => $errorBody,
+                        'error_data' => $errorData,
+                        'api_key_prefix' => substr($apiKey, 0, 10) . '...',
+                    ]);
+                    
+                    $errorMessage = 'Token API invalide ou expiré.';
+                    if ($statusCode === 401) {
+                        $errorMessage = 'Token API invalide. Vérifiez que vous avez copié le token complet depuis HuggingFace.';
+                    } elseif ($statusCode === 403) {
+                        $errorMessage = 'Token API sans permissions. Assurez-vous que le token a les permissions "Read".';
+                    } elseif ($statusCode === 429) {
+                        $errorMessage = 'Trop de requêtes. Réessayez dans quelques instants.';
+                    } elseif (isset($errorData['error'])) {
+                        $errorMessage = $errorData['error'];
+                    }
+                    
                     return response()->json([
                         'success' => false,
-                        'message' => '❌ Erreur : Token API invalide ou expiré.',
+                        'message' => '❌ Erreur : ' . $errorMessage,
                         'details' => [
                             'provider' => $provider->display_name,
                             'environment' => $provider->environment,
+                            'status_code' => $statusCode,
+                            'hint' => 'Vérifiez que le token commence par "hf_" et qu\'il a été copié complètement.',
                         ],
                     ], 400);
                 }
@@ -1088,7 +1210,9 @@ class AdminController extends Controller
             ],
             'huggingface' => [
                 'whisper_api_url' => 'URL API Whisper',
-                'model_name' => 'Nom du modèle',
+                'llm_api_url' => 'URL API LLM (pour amélioration newsletter)',
+                'llm_model' => 'Modèle LLM',
+                'model_name' => 'Nom du modèle Whisper',
             ],
             default => [],
         };
@@ -1181,6 +1305,142 @@ class AdminController extends Controller
         $subscriber->delete();
 
         return back()->with('success', 'Abonné supprimé.');
+    }
+
+    /**
+     * Show create newsletter form
+     */
+    public function createNewsletter()
+    {
+        $newsletters = Newsletter::orderBy('created_at', 'desc')
+            ->paginate(10);
+        
+        return view('admin.newsletter.create', compact('newsletters'));
+    }
+
+    /**
+     * Analyze and improve newsletter content with AI
+     */
+    public function analyzeNewsletterContent(Request $request)
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'content' => 'required|string|min:10',
+            'language' => 'nullable|string|in:fr,en',
+        ]);
+
+        try {
+            // Vérifier que l'API OpenAI est configurée
+            $aiProvider = \App\Models\AIProvider::getDefault();
+            if (!$aiProvider || !$aiProvider->is_active) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Le fournisseur d\'IA n\'est pas configuré ou activé. Veuillez configurer OpenAI dans les paramètres.',
+                ], 400);
+            }
+            
+            $apiKey = $aiProvider->getCredential('api_key', '');
+            if (empty($apiKey)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'La clé API OpenAI n\'est pas configurée. Veuillez la configurer dans les paramètres.',
+                ], 400);
+            }
+            
+            $aiService = new \App\Services\AIService();
+            
+            $result = $aiService->improveNewsletterContent(
+                $validated['subject'],
+                $validated['content'],
+                $validated['language'] ?? 'fr'
+            );
+
+            if (isset($result['error'])) {
+                \Log::warning('Newsletter analysis returned error', [
+                    'error' => $result['error'],
+                    'subject' => $validated['subject'],
+                    'content_length' => strlen($validated['content']),
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error'],
+                ], 400);
+            }
+
+            \Log::info('Newsletter analysis successful', [
+                'subject_length' => strlen($result['subject']),
+                'content_length' => strlen($result['content']),
+                'improvements_count' => count($result['improvements'] ?? []),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'subject' => $result['subject'],
+                'content' => $result['content'],
+                'improvements' => $result['improvements'] ?? [],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error analyzing newsletter content', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de l\'analyse: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Store and send newsletter
+     */
+    public function storeNewsletter(Request $request)
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'content' => 'required|string|min:10',
+        ]);
+
+        try {
+            // Créer la newsletter
+            $newsletter = Newsletter::create([
+                'subject' => $validated['subject'],
+                'content' => $validated['content'],
+                'status' => 'draft',
+                'created_by' => auth()->id(),
+            ]);
+
+            // Récupérer tous les abonnés actifs
+            $subscribers = NewsletterSubscriber::where('is_active', true)->get();
+            
+            if ($subscribers->isEmpty()) {
+                return back()->with('error', 'Aucun abonné actif pour envoyer la newsletter.');
+            }
+
+            // Mettre à jour le nombre total de destinataires
+            $newsletter->update([
+                'total_recipients' => $subscribers->count(),
+                'status' => 'sending',
+            ]);
+
+            // Dispatcher les jobs pour envoyer les emails
+            foreach ($subscribers as $subscriber) {
+                \App\Jobs\SendNewsletterJob::dispatch($newsletter, $subscriber);
+            }
+            
+            // Note: Le statut sera mis à jour automatiquement par SendNewsletterJob
+            // quand tous les emails auront été traités
+
+            return redirect()->route('admin.newsletter.create')
+                ->with('success', "Newsletter créée et en cours d'envoi à {$subscribers->count()} abonnés.");
+        } catch (\Exception $e) {
+            \Log::error('Error creating newsletter: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de la création de la newsletter: ' . $e->getMessage());
+        }
     }
 
     /**

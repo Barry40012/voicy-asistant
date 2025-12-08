@@ -25,13 +25,12 @@ class ResetPasswordNotification extends ResetPasswordBase
             'email' => $notifiable->getEmailForPasswordReset(),
         ], false));
 
+        // Utiliser un template personnalisé avec design moderne
         return (new MailMessage)
             ->subject('Réinitialisation de votre mot de passe - ' . config('app.name', 'Voicy Assistant'))
-            ->greeting('Bonjour ' . $notifiable->name . ' !')
-            ->line('Vous recevez cet email car nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.')
-            ->action('Réinitialiser le mot de passe', $url)
-            ->line('Ce lien de réinitialisation expirera dans ' . config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60) . ' minutes.')
-            ->line('Si vous n\'avez pas demandé de réinitialisation de mot de passe, aucune action n\'est requise.')
-            ->salutation('Cordialement,<br>L\'équipe ' . config('app.name', 'Voicy Assistant'));
+            ->view('emails.reset-password', [
+                'url' => $url,
+                'user' => $notifiable,
+            ]);
     }
 }

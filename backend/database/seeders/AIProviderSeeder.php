@@ -34,7 +34,7 @@ class AIProviderSeeder extends Seeder
             [
                 'name' => 'huggingface',
                 'display_name' => 'HuggingFace',
-                'description' => 'Provider HuggingFace avec modèles Whisper open source',
+                'description' => 'Provider HuggingFace avec modèles Whisper open source et LLM pour l\'analyse',
                 'is_active' => false,
                 'is_default' => false,
                 'environment' => 'test',
@@ -42,8 +42,10 @@ class AIProviderSeeder extends Seeder
                     'api_key' => '',
                 ]),
                 'config' => json_encode([
-                    'whisper_api_url' => 'https://api-inference.huggingface.co/models/openai/whisper-base',
+                    'whisper_api_url' => 'https://router.huggingface.co/models/openai/whisper-base',
+                    'llm_api_url' => 'https://router.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
                     'model_name' => 'openai/whisper-base',
+                    'llm_model' => 'mistralai/Mistral-7B-Instruct-v0.2',
                 ]),
                 'created_at' => now(),
                 'updated_at' => now(),
