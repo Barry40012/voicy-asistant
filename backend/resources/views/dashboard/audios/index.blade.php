@@ -4,6 +4,10 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Mes Audios') }}
             </h2>
+            <a href="{{ route('dashboard.test-audio.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 transition shadow-lg hover:shadow-xl">
+                <i class="fas fa-flask mr-2"></i>
+                Tester un Audio
+            </a>
         </div>
     </x-slot>
 
@@ -84,7 +88,11 @@
                         </svg>
                         <h3 class="mt-2 text-sm font-semibold text-gray-900">Aucun audio</h3>
                         <p class="mt-1 text-sm text-gray-500">Aucun message vocal n'a encore été reçu.</p>
-                        <div class="mt-6">
+                        <div class="mt-6 space-x-4">
+                            <a href="{{ route('dashboard.test-audio.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <i class="fas fa-flask mr-2"></i>
+                                Tester avec un Audio
+                            </a>
                             <a href="{{ route('dashboard.whatsapp.index') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Connecter WhatsApp
                             </a>

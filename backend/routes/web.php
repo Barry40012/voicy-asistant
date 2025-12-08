@@ -46,6 +46,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{audio}', [AudioController::class, 'show'])->name('show');
     });
 
+    // Test Audio (for development)
+    Route::prefix('dashboard/test-audio')->name('dashboard.test-audio.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TestAudioController::class, 'index'])->name('index');
+        Route::post('/upload', [\App\Http\Controllers\TestAudioController::class, 'upload'])->name('upload');
+    });
+
     // Subscription
     Route::prefix('dashboard/subscription')->name('dashboard.subscription.')->group(function () {
         Route::get('/', [SubscriptionController::class, 'index'])->name('index');

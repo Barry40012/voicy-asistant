@@ -11,6 +11,7 @@ use App\Services\PaymentService;
 use App\Services\PaymentAdapters\FlutterwaveAdapter;
 use App\Services\PaymentAdapters\StripeAdapter;
 use App\Services\PaymentAdapters\PaycardAdapter;
+use App\Services\PaymentAdapters\DPOGroupAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -543,11 +544,28 @@ class SubscriptionController extends Controller
      */
     public function callback(Request $request, string $provider)
     {
-        if ($provider !== 'flutterwave') {
+        Log::info('Payment callback received', [
+            'provider' => $provider,
+            'all_params' => $request->all(),
+            'query_params' => $request->query(),
+        ]);
+
+        // Gérer les callbacks selon le provider
+        if ($provider === 'flutterwave') {
+            return $this->handleFlutterwaveCallback($request);
+        } elseif ($provider === 'dpogroup') {
+            return $this->handleDPOGroupCallback($request);
+        } else {
             return redirect()->route('dashboard.subscription.index')
                 ->withErrors(['payment' => 'Provider non supporté']);
         }
+    }
 
+    /**
+     * Handle Flutterwave callback
+     */
+    private function handleFlutterwaveCallback(Request $request)
+    {
         $txRef = $request->query('tx_ref');
         $status = $request->query('status');
         $transactionId = $request->query('transaction_id');
@@ -760,6 +778,144 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Handle DPO Group callback
+     */
+    private function handleDPOGroupCallback(Request $request)
+    {
+        // DPO Group redirige avec TransactionToken et CompanyRef
+        $transactionToken = $request->query('TransactionToken') ?? $request->query('transactionToken');
+        $companyRef = $request->query('CompanyRef') ?? $request->query('companyRef');
+        $status = $request->query('status') ?? $request->query('Status');
+
+        Log::info('DPO Group callback received', [
+            'transaction_token' => $transactionToken,
+            'company_ref' => $companyRef,
+            'status' => $status,
+            'all_params' => $request->all(),
+        ]);
+
+        if (!$companyRef && !$transactionToken) {
+            return redirect()->route('dashboard.subscription.index')
+                ->withErrors(['payment' => 'Référence de transaction manquante']);
+        }
+
+        // Find payment by company_ref (qui est notre provider_payment_id)
+        $payment = Payment::with('user')
+            ->where('provider', 'dpogroup')
+            ->where(function($query) use ($companyRef, $transactionToken) {
+                if ($companyRef) {
+                    $query->where('provider_payment_id', $companyRef);
+                }
+                if ($transactionToken) {
+                    $query->orWhere('metadata->token', $transactionToken);
+                }
+            })
+            ->first();
+
+        if (!$payment) {
+            Log::warning('DPO Group payment not found', [
+                'company_ref' => $companyRef,
+                'transaction_token' => $transactionToken,
+            ]);
+            return redirect()->route('dashboard.subscription.index')
+                ->withErrors(['payment' => 'Paiement introuvable']);
+        }
+
+        // Vérifier la transaction avec DPO Group API
+        $adapter = new DPOGroupAdapter();
+        $transaction = null;
+        try {
+            $transaction = $adapter->verifyTransaction($transactionToken ?? '', $companyRef);
+        } catch (\Exception $e) {
+            Log::warning('DPO Group transaction verification failed', [
+                'error' => $e->getMessage(),
+                'transaction_token' => $transactionToken,
+                'company_ref' => $companyRef,
+            ]);
+        }
+
+        // Utiliser la même logique de traitement que Flutterwave
+        $failedStatuses = ['failed', 'cancelled', 'error', 'declined', 'rejected', '2'];
+        $successStatuses = ['successful', 'success', 'completed', 'succeeded', 'paid', '3'];
+        
+        $urlStatus = strtolower($status ?? '');
+        $apiStatus = $transaction ? strtolower($transaction['status'] ?? '') : '';
+        
+        $isUrlSuccessful = $status && !in_array($urlStatus, $failedStatuses);
+        $isApiSuccessful = $apiStatus && in_array($apiStatus, $successStatuses);
+        $isAlreadySucceeded = $payment->status === 'succeeded';
+        
+        $isSuccessful = $isUrlSuccessful || $isApiSuccessful || $isAlreadySucceeded;
+
+        if ($isSuccessful) {
+            // Update payment status
+            $payment->update([
+                'status' => 'succeeded',
+                'metadata' => array_merge($payment->metadata ?? [], $transaction['metadata'] ?? [], [
+                    'callback_status' => $status,
+                    'transaction_token' => $transactionToken,
+                    'verified_at' => now()->toDateTimeString(),
+                ]),
+            ]);
+
+            // Activer l'abonnement (même logique que Flutterwave)
+            $metadata = $payment->metadata ?? [];
+            $subscriptionId = $metadata['subscription_id'] ?? null;
+
+            if ($subscriptionId) {
+                $subscription = Subscription::with('plan')->find($subscriptionId);
+                if ($subscription) {
+                    $oldSubscription = Subscription::where('user_id', $subscription->user_id)
+                        ->where('id', '!=', $subscription->id)
+                        ->where('status', 'active')
+                        ->with('plan')
+                        ->first();
+                    
+                    $remainingDays = 0;
+                    if ($oldSubscription && $oldSubscription->expires_at->isFuture()) {
+                        $remainingDays = max(0, now()->diffInDays($oldSubscription->expires_at, false));
+                    }
+                    
+                    Subscription::where('user_id', $subscription->user_id)
+                        ->where('id', '!=', $subscription->id)
+                        ->where('status', 'active')
+                        ->update(['status' => 'cancelled']);
+                    
+                    $newExpiresAt = now()->addMonth();
+                    if ($remainingDays > 0) {
+                        $additionalDays = min($remainingDays, 30);
+                        $newExpiresAt = now()->addMonth()->addDays($additionalDays);
+                    }
+                    
+                    $subscription->update([
+                        'status' => 'active',
+                        'started_at' => now(),
+                        'expires_at' => $newExpiresAt,
+                    ]);
+                    
+                    // Envoyer l'email de reçu
+                    try {
+                        $payment->load('user');
+                        $subscription->load('plan');
+                        Mail::to($payment->user->email)->send(new PaymentReceiptMail($payment, $subscription));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send payment receipt email', [
+                            'error' => $e->getMessage(),
+                            'payment_id' => $payment->id,
+                        ]);
+                    }
+                }
+            }
+
+            return redirect()->route('dashboard.subscription.index')
+                ->with('success', 'Paiement confirmé et abonnement activé avec succès !');
+        } else {
+            return redirect()->route('dashboard.subscription.index')
+                ->withErrors(['payment' => 'Le paiement n\'a pas pu être confirmé. Veuillez réessayer ou contacter le support.']);
+        }
+    }
+
+    /**
      * Create payment adapter based on provider name
      */
     private function createAdapter(string $providerName)
@@ -768,6 +924,7 @@ class SubscriptionController extends Controller
             'flutterwave' => new FlutterwaveAdapter(),
             'stripe' => new StripeAdapter(),
             'paycard' => new PaycardAdapter(),
+            'dpogroup' => new DPOGroupAdapter(),
             // Ajouter d'autres providers ici
             default => null,
         };

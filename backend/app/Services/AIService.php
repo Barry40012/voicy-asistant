@@ -104,6 +104,13 @@ class AIService
                     $data = $response->json();
                     $result['transcript'] = $data['text'] ?? null;
                     
+                    if (empty($result['transcript'])) {
+                        Log::error('Whisper returned empty transcript', [
+                            'response' => $data,
+                        ]);
+                        return $result; // Retourner avec transcript null
+                    }
+                    
                     // Détection de langue depuis Whisper
                     $detectedLang = strtolower($data['language'] ?? '');
                     $result['detected_language'] = $this->normalizeLanguageCode($detectedLang);
@@ -123,6 +130,19 @@ class AIService
                     ]);
                     
                     return $result;
+                } else {
+                    $errorData = $response->json();
+                    $errorMessage = $errorData['error']['message'] ?? $response->body();
+                    
+                    Log::error('Whisper API request failed', [
+                        'status' => $response->status(),
+                        'response' => $response->body(),
+                        'json' => $errorData,
+                        'error_message' => $errorMessage,
+                    ]);
+                    
+                    // Retourner une erreur plus claire
+                    throw new \Exception('Erreur Whisper API: ' . $errorMessage);
                 }
             }
 

@@ -87,12 +87,20 @@ class ProcessAudioJob implements ShouldQueue
             Log::error('Error processing audio', [
                 'audio_id' => $this->audio->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             $this->audio->update([
                 'status' => 'error',
-                'error_message' => $e->getMessage(),
+                'error_message' => $e->getMessage() . ' (Fichier: ' . basename($e->getFile()) . ', Ligne: ' . $e->getLine() . ')',
             ]);
+
+            // Ne pas relancer le job si on a déjà essayé plusieurs fois
+            if ($this->attempts() >= $this->tries) {
+                return; // Arrêter les tentatives
+            }
 
             throw $e; // Retry job
         }

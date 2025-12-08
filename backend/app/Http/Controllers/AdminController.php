@@ -767,6 +767,32 @@ class AdminController extends Controller
                     'live_label' => 'Secret webhook (Production)',
                 ],
             ],
+            'dpogroup' => [
+                'company_token' => [
+                    'label' => 'Company Token',
+                    'test_label' => 'Company Token (Test)',
+                    'live_label' => 'Company Token (Production)',
+                    'test_placeholder' => 'Votre Company Token DPO',
+                    'live_placeholder' => 'Votre Company Token DPO',
+                ],
+                'service_type' => [
+                    'label' => 'Service Type',
+                    'test_label' => 'Service Type (Test)',
+                    'live_label' => 'Service Type (Production)',
+                    'test_placeholder' => '5525 (par défaut)',
+                    'live_placeholder' => '5525 (par défaut)',
+                ],
+                'api_key' => [
+                    'label' => 'Clé API',
+                    'test_label' => 'Clé API (Test)',
+                    'live_label' => 'Clé API (Production)',
+                ],
+                'webhook_secret' => [
+                    'label' => 'Secret webhook',
+                    'test_label' => 'Secret webhook (Test)',
+                    'live_label' => 'Secret webhook (Production)',
+                ],
+            ],
             default => [],
         };
     }
@@ -778,6 +804,12 @@ class AdminController extends Controller
     {
         return match($providerName) {
             'flutterwave' => [
+                'base_url' => 'URL de base de l\'API',
+            ],
+            'paycard' => [
+                'base_url' => 'URL de base de l\'API',
+            ],
+            'dpogroup' => [
                 'base_url' => 'URL de base de l\'API',
             ],
             default => [],

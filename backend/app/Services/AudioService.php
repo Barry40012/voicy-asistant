@@ -27,11 +27,19 @@ class AudioService
             $path = "audios/{$filename}";
             $url = "{$this->supabaseUrl}/storage/v1/object/{$this->bucket}/{$path}";
 
-            $response = Http::withHeaders([
+            $httpClient = Http::withHeaders([
                 'Authorization' => "Bearer {$this->serviceKey}",
                 'Content-Type' => 'audio/ogg',
                 'x-upsert' => 'true', // Overwrite if exists
-            ])->withBody($content, 'audio/ogg')
+            ]);
+            
+            // Désactiver la vérification SSL uniquement en développement local
+            // En production, la vérification SSL est activée pour la sécurité
+            if (app()->environment('local')) {
+                $httpClient = $httpClient->withOptions(['verify' => false]);
+            }
+            
+            $response = $httpClient->withBody($content, 'audio/ogg')
               ->put($url);
 
             if ($response->successful()) {
@@ -60,9 +68,16 @@ class AudioService
         try {
             $url = "{$this->supabaseUrl}/storage/v1/object/sign/{$this->bucket}/{$path}";
             
-            $response = Http::withHeaders([
+            $httpClient = Http::withHeaders([
                 'Authorization' => "Bearer {$this->serviceKey}",
-            ])->post($url, [
+            ]);
+            
+            // Désactiver la vérification SSL uniquement en développement local
+            if (app()->environment('local')) {
+                $httpClient = $httpClient->withOptions(['verify' => false]);
+            }
+            
+            $response = $httpClient->post($url, [
                 'expiresIn' => $expiresIn,
             ]);
 
@@ -99,9 +114,16 @@ class AudioService
         try {
             $url = "{$this->supabaseUrl}/storage/v1/object/{$this->bucket}/{$path}";
 
-            $response = Http::withHeaders([
+            $httpClient = Http::withHeaders([
                 'Authorization' => "Bearer {$this->serviceKey}",
-            ])->get($url);
+            ]);
+            
+            // Désactiver la vérification SSL uniquement en développement local
+            if (app()->environment('local')) {
+                $httpClient = $httpClient->withOptions(['verify' => false]);
+            }
+            
+            $response = $httpClient->get($url);
 
             if ($response->successful()) {
                 return $response->body();
@@ -131,9 +153,16 @@ class AudioService
         try {
             $url = "{$this->supabaseUrl}/storage/v1/object/{$this->bucket}/{$path}";
 
-            $response = Http::withHeaders([
+            $httpClient = Http::withHeaders([
                 'Authorization' => "Bearer {$this->serviceKey}",
-            ])->delete($url);
+            ]);
+            
+            // Désactiver la vérification SSL uniquement en développement local
+            if (app()->environment('local')) {
+                $httpClient = $httpClient->withOptions(['verify' => false]);
+            }
+            
+            $response = $httpClient->delete($url);
 
             if ($response->successful()) {
                 return true;

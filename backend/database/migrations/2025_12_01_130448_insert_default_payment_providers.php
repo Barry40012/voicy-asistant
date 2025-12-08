@@ -96,6 +96,25 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'dpogroup',
+                'display_name' => 'DPO Group',
+                'description' => 'Direct Pay Online - Paiements par carte Visa/Mastercard en Afrique de l\'Ouest',
+                'is_active' => false,
+                'is_default' => false,
+                'environment' => 'test',
+                'credentials' => json_encode([
+                    'company_token' => '',
+                    'service_type' => '5525',
+                    'api_key' => '',
+                    'webhook_secret' => '',
+                ]),
+                'config' => json_encode([
+                    'base_url' => 'https://secure1.sandbox.directpay.online',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('payment_providers')->insert($providers);
@@ -106,6 +125,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::table('payment_providers')->whereIn('name', ['flutterwave', 'stripe', 'orange', 'mtn', 'paycard'])->delete();
+        DB::table('payment_providers')->whereIn('name', ['flutterwave', 'stripe', 'orange', 'mtn', 'paycard', 'dpogroup'])->delete();
     }
 };
