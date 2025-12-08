@@ -12,7 +12,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/react-app.jsx'])
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         
         <!-- Font Awesome Icons -->
@@ -62,19 +62,61 @@
                 from { transform: translateX(-100%); }
                 to { transform: translateX(100%); }
             }
+            @keyframes shimmer {
+                0% { background-position: -1000px 0; }
+                100% { background-position: 1000px 0; }
+            }
+            @keyframes shine {
+                0% { transform: translateX(-100%) skewX(-20deg); }
+                100% { transform: translateX(200%) skewX(-20deg); }
+            }
+            @keyframes sparkle {
+                0%, 100% { 
+                    opacity: 0;
+                    transform: scale(0) translateY(0);
+                }
+                50% { 
+                    opacity: 1;
+                    transform: scale(1.5) translateY(-10px);
+                }
+            }
+            .animate-sparkle {
+                animation: sparkle 2s ease-in-out infinite;
+            }
             .star-3d-gold {
                 animation: starGlow 2s ease-in-out infinite;
                 transform-style: preserve-3d;
             }
             @keyframes starGlow {
                 0%, 100% {
-                    filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
-                    transform: scale(1) rotateY(0deg);
+                    transform: scale(1) rotateY(0deg) rotateZ(0deg);
+                    opacity: 1;
+                }
+                25% {
+                    transform: scale(1.1) rotateY(5deg) rotateZ(5deg);
+                    opacity: 0.9;
                 }
                 50% {
-                    filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 12px rgba(255, 215, 0, 0.6));
-                    transform: scale(1.1) rotateY(10deg);
+                    transform: scale(1.15) rotateY(10deg) rotateZ(-5deg);
+                    opacity: 1;
                 }
+                75% {
+                    transform: scale(1.1) rotateY(-5deg) rotateZ(5deg);
+                    opacity: 0.9;
+                }
+            }
+            .animate-shimmer {
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.4),
+                    transparent
+                );
+                background-size: 1000px 100%;
+                animation: shimmer 3s infinite;
+            }
+            .animate-shine {
+                animation: shine 2s ease-in-out infinite;
             }
             .animate-float {
                 animation: float 3s ease-in-out infinite;

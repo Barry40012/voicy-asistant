@@ -108,19 +108,126 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Progress bar for subscription -->
+                                    <!-- Progress bar for subscription with dynamic colors -->
                                     @php
                                         $daysRemaining = now()->diffInDays($subscription->expires_at, false);
                                         $totalDays = now()->diffInDays($subscription->started_at, false) + $daysRemaining;
-                                        $progress = $totalDays > 0 ? (($totalDays - $daysRemaining) / $totalDays) * 100 : 0;
+                                        
+                                        // Calculer le pourcentage de temps restant (la barre diminue quand les jours diminuent)
+                                        // Si totalDays = 30 et daysRemaining = 15, alors remainingProgress = 50%
+                                        $remainingProgress = $totalDays > 0 ? ($daysRemaining / $totalDays) * 100 : 0;
+                                        $remainingProgress = min(100, max(0, $remainingProgress));
+                                        
+                                        // Déterminer la couleur selon les jours restants
+                                        $barColor = 'from-green-500 to-green-600'; // Par défaut vert
+                                        $barGlow = 'shadow-green-500/50';
+                                        $textColor = 'text-green-600';
+                                        $icon = 'fa-check-circle';
+                                        
+                                        if ($daysRemaining <= 0) {
+                                            // 0 jour ou expiré - Bleu comme demandé
+                                            $barColor = 'from-blue-500 to-blue-600';
+                                            $barGlow = 'shadow-blue-500/50';
+                                            $textColor = 'text-blue-600';
+                                            $icon = 'fa-exclamation-circle';
+                                            $remainingProgress = 100; // Barre complète
+                                        } elseif ($daysRemaining <= 3) {
+                                            // 1-3 jours - Rouge/Orange (urgence)
+                                            $barColor = 'from-red-500 to-orange-500';
+                                            $barGlow = 'shadow-red-500/50';
+                                            $textColor = 'text-red-600';
+                                            $icon = 'fa-exclamation-triangle';
+                                        } elseif ($daysRemaining <= 7) {
+                                            // 4-7 jours - Orange/Jaune (attention)
+                                            $barColor = 'from-orange-500 to-yellow-500';
+                                            $barGlow = 'shadow-orange-500/50';
+                                            $textColor = 'text-orange-600';
+                                            $icon = 'fa-clock';
+                                        } elseif ($daysRemaining <= 15) {
+                                            // 8-15 jours - Jaune/Vert (bien)
+                                            $barColor = 'from-yellow-500 to-green-500';
+                                            $barGlow = 'shadow-yellow-500/50';
+                                            $textColor = 'text-yellow-600';
+                                            $icon = 'fa-calendar-check';
+                                        }
+                                        // Plus de 15 jours reste vert (par défaut)
                                     @endphp
-                                    <div class="mt-4">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <p class="text-xs font-semibold text-gray-700">Temps restant</p>
-                                            <p class="text-sm font-bold text-primary-600">{{ max(0, $daysRemaining) }} jours</p>
+                                    <div class="mt-4 sm:mt-6" data-aos="fade-up" data-aos-delay="300">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="text-xs sm:text-sm font-bold text-gray-700 flex items-center">
+                                                <i class="fas fa-hourglass-half {{ $textColor }} mr-2 animate-pulse"></i>
+                                                Temps restant
+                                            </p>
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas {{ $icon }} {{ $textColor }} text-sm animate-bounce"></i>
+                                                <p class="text-sm sm:text-base font-bold {{ $textColor }}">
+                                                    {{ $daysRemaining <= 0 ? 'Expiré' : max(0, $daysRemaining) . ' jour' . ($daysRemaining > 1 ? 's' : '') }}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-gradient-to-r from-primary-500 to-secondary-500 h-2.5 rounded-full transition-all duration-1000" style="width: {{ min(100, max(0, $progress)) }}%"></div>
+                                        <div class="relative w-full bg-gray-200 rounded-full h-4 sm:h-5 overflow-hidden shadow-inner">
+                                            <!-- Animated background shimmer -->
+                                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                                            
+                                            <!-- Progress bar with dynamic color -->
+                                            <div 
+                                                class="bg-gradient-to-r {{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden shadow-lg"
+                                                style="width: {{ $remainingProgress }}%"
+                                                x-data="{ width: 0 }"
+                                                x-init="
+                                                    setTimeout(() => { 
+                                                        width = {{ $remainingProgress }};
+                                                        $el.style.width = width + '%';
+                                                    }, 200);
+                                                "
+                                            >
+                                                <!-- Animated shine effect -->
+                                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shine"></div>
+                                                
+                                                <!-- Pulsing glow effect for urgency -->
+                                                @if($daysRemaining <= 7)
+                                                <div class="absolute inset-0 bg-gradient-to-r {{ $barColor }} opacity-60 animate-pulse"></div>
+                                                @endif
+                                                
+                                                <!-- Sparkle particles effect -->
+                                                <div class="absolute inset-0">
+                                                    @for($i = 0; $i < 5; $i++)
+                                                    <div class="absolute w-1 h-1 bg-white rounded-full opacity-0 animate-sparkle" style="left: {{ 20 + $i * 15 }}%; animation-delay: {{ $i * 0.3 }}s;"></div>
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Status message -->
+                                        <div class="mt-2 flex items-center justify-between">
+                                            @if($daysRemaining <= 0)
+                                                <p class="text-xs text-red-600 font-semibold flex items-center animate-pulse">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    Votre abonnement a expiré. Renouvelez maintenant !
+                                                </p>
+                                            @elseif($daysRemaining <= 3)
+                                                <p class="text-xs text-orange-600 font-semibold flex items-center">
+                                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                    Attention ! Votre abonnement expire bientôt
+                                                </p>
+                                            @elseif($daysRemaining <= 7)
+                                                <p class="text-xs text-yellow-600 font-semibold flex items-center">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    Pensez à renouveler votre abonnement
+                                                </p>
+                                            @else
+                                                <p class="text-xs text-green-600 font-semibold flex items-center">
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Votre abonnement est actif
+                                                </p>
+                                            @endif
+                                            
+                                            @if($daysRemaining <= 7)
+                                                <a href="{{ route('dashboard.subscription.index') }}" class="text-xs text-primary-600 hover:text-primary-700 font-bold flex items-center transition-all hover:underline">
+                                                    Renouveler
+                                                    <i class="fas fa-arrow-right ml-1"></i>
+                                                </a>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

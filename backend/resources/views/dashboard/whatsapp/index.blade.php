@@ -1,230 +1,330 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Connexion WhatsApp') }}
-        </h2>
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-3 shadow-lg">
+                <i class="fab fa-whatsapp text-white text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="font-semibold text-xl sm:text-2xl text-gray-800 leading-tight">
+                    {{ __('Connexion WhatsApp') }}
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Connectez votre compte WhatsApp Business</p>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8 sm:py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if($connection && $connection->webhook_verified)
-                        <!-- WhatsApp connecté -->
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-green-900">WhatsApp connecté ✅</h3>
-                                    <p class="text-sm text-green-700 mt-1">
-                                        Ton compte WhatsApp Business est connecté et actif.
-                                        @if($connection->phone_number)
-                                            <br>Numéro : <strong>{{ $connection->phone_number }}</strong>
-                                        @endif
+            @if($connection && $connection->webhook_verified)
+                <!-- WhatsApp connecté -->
+                <div class="bg-gradient-to-br from-green-50 via-green-100 to-emerald-50 border-2 border-green-300 rounded-2xl p-6 sm:p-8 mb-6 shadow-xl" data-aos="zoom-in">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6">
+                            <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-2xl animate-pulse-glow">
+                                <i class="fab fa-whatsapp text-white text-4xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl sm:text-3xl font-bold text-green-900 mb-2 flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                WhatsApp connecté ✅
+                            </h3>
+                            <p class="text-base sm:text-lg text-green-700 mb-3">
+                                Ton compte WhatsApp Business est connecté et actif.
+                            </p>
+                            @if($connection->phone_number)
+                                <div class="bg-white/80 rounded-xl p-4 shadow-md inline-block">
+                                    <p class="text-sm text-gray-600 font-medium mb-1">Numéro connecté</p>
+                                    <p class="text-lg font-bold text-gray-900 flex items-center">
+                                        <i class="fas fa-phone-alt text-green-600 mr-2"></i>
+                                        {{ $connection->phone_number }}
                                     </p>
                                 </div>
-                            </div>
-                        </div>
-                    @else
-                        <!-- Assistant de Connexion -->
-                        <div class="mb-8">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Connecter WhatsApp Business</h3>
-                            <p class="text-gray-600 mb-6">
-                                Suis notre assistant pas-à-pas pour connecter ton WhatsApp Business en moins de 5 minutes.
-                            </p>
-
-                            <!-- Assistant Interactif -->
-                            <div x-data="{ step: 1, totalSteps: 4 }" class="space-y-6">
-                                <!-- Étape 1 : Créer l'app Meta -->
-                                <div x-show="step === 1" class="bg-gradient-to-br from-primary-50 to-primary-100 border-2 border-primary-200 rounded-xl p-6">
-                                    <div class="flex items-start mb-4">
-                                        <div class="flex-shrink-0 bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">
-                                            1
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-bold text-gray-900 mb-2">Créer une Application Meta</h4>
-                                            <p class="text-sm text-gray-700 mb-4">
-                                                Tu dois créer une application Meta pour accéder à WhatsApp Business API.
-                                            </p>
-                                            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-4">
-                                                <li>Va sur <a href="https://developers.facebook.com" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium underline">Meta Developers</a></li>
-                                                <li>Clique sur <strong>"Mes applications"</strong> puis <strong>"Créer une application"</strong></li>
-                                                <li>Choisis le type <strong>"Business"</strong></li>
-                                                <li>Remplis les informations et clique sur <strong>"Créer"</strong></li>
-                                            </ol>
-                                            <a href="https://developers.facebook.com/apps/create" target="_blank" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
-                                                Créer l'application Meta
-                                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-end">
-                                        <button @click="step = 2" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
-                                            Suivant →
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Étape 2 : Ajouter WhatsApp -->
-                                <div x-show="step === 2" class="bg-gradient-to-br from-secondary-50 to-secondary-100 border-2 border-secondary-200 rounded-xl p-6">
-                                    <div class="flex items-start mb-4">
-                                        <div class="flex-shrink-0 bg-secondary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">
-                                            2
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-bold text-gray-900 mb-2">Ajouter WhatsApp à l'application</h4>
-                                            <p class="text-sm text-gray-700 mb-4">
-                                                Une fois l'application créée, ajoute le produit WhatsApp.
-                                            </p>
-                                            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-4">
-                                                <li>Dans le dashboard de ton application, cherche <strong>"Ajouter un produit"</strong></li>
-                                                <li>Trouve <strong>"WhatsApp"</strong> dans la liste</li>
-                                                <li>Clique sur <strong>"Configurer"</strong> à côté de WhatsApp</li>
-                                                <li>Clique sur <strong>"Commencer"</strong> ou <strong>"Get Started"</strong></li>
-                                            </ol>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <button @click="step = 1" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                            ← Précédent
-                                        </button>
-                                        <button @click="step = 3" class="px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition">
-                                            Suivant →
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Étape 3 : Récupérer les Credentials -->
-                                <div x-show="step === 3" class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6">
-                                    <div class="flex items-start mb-4">
-                                        <div class="flex-shrink-0 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">
-                                            3
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-bold text-gray-900 mb-2">Récupérer les Credentials</h4>
-                                            <p class="text-sm text-gray-700 mb-4">
-                                                Copie ces informations depuis Meta Developers.
-                                            </p>
-                                            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-4">
-                                                <li>Dans le menu de gauche, clique sur <strong>"API Setup"</strong> ou <strong>"Configuration API"</strong></li>
-                                                <li>Copie le <strong>"Phone number ID"</strong></li>
-                                                <li>Copie le <strong>"WhatsApp Business Account ID"</strong></li>
-                                                <li>Copie le <strong>"Temporary access token"</strong> (commence par EAA...)</li>
-                                            </ol>
-                                            <div class="bg-white rounded-lg p-4 border border-green-200">
-                                                <p class="text-xs text-gray-500 mb-2">💡 Astuce : Ouvre Meta Developers dans un autre onglet pour copier ces informations</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <button @click="step = 2" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                            ← Précédent
-                                        </button>
-                                        <button @click="step = 4" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                            Suivant →
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Étape 4 : Entrer les Credentials -->
-                                <div x-show="step === 4" class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6">
-                                    <div class="flex items-start mb-4">
-                                        <div class="flex-shrink-0 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">
-                                            4
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-bold text-gray-900 mb-4">Entrer les Credentials</h4>
-                                            
-                                            <!-- Formulaire -->
-                                            <form method="POST" action="{{ route('dashboard.whatsapp.store') }}" class="space-y-4">
-                                                @csrf
-
-                                                <div>
-                                                    <label for="phone_number_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                                        Phone Number ID *
-                                                    </label>
-                                                    <input type="text" name="phone_number_id" id="phone_number_id" value="{{ old('phone_number_id', $connection->phone_number_id ?? '') }}" required
-                                                           placeholder="Ex: 123456789012345"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                    @error('phone_number_id')
-                                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-
-                                                <div>
-                                                    <label for="whatsapp_business_account_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                                        WhatsApp Business Account ID *
-                                                    </label>
-                                                    <input type="text" name="whatsapp_business_account_id" id="whatsapp_business_account_id" value="{{ old('whatsapp_business_account_id', $connection->whatsapp_business_account_id ?? '') }}" required
-                                                           placeholder="Ex: 987654321098765"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                    @error('whatsapp_business_account_id')
-                                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-
-                                                <div>
-                                                    <label for="access_token" class="block text-sm font-medium text-gray-700 mb-2">
-                                                        Access Token (Temporaire) *
-                                                    </label>
-                                                    <textarea name="access_token" id="access_token" rows="3" required
-                                                              placeholder="EAAxxxxxxxxxxxxx..."
-                                                              class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">{{ old('access_token', $connection->access_token ?? '') }}</textarea>
-                                                    @error('access_token')
-                                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                                    @enderror
-                                                    <p class="mt-1 text-xs text-gray-500">⚠️ Ce token expire après 24h. Pour la production, tu devras créer un token permanent.</p>
-                                                </div>
-
-                                                <div>
-                                                    <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-2">
-                                                        Numéro de téléphone (optionnel)
-                                                    </label>
-                                                    <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $connection->phone_number ?? '') }}"
-                                                           placeholder="+33 6 12 34 56 78"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                </div>
-
-                                                <div class="flex justify-between pt-4">
-                                                    <button type="button" @click="step = 3" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                                        ← Précédent
-                                                    </button>
-                                                    <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-semibold">
-                                                        ✅ Connecter WhatsApp
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Documentation -->
-                    <div class="mt-8 border-t border-gray-200 pt-6">
-                        <h4 class="text-md font-semibold text-gray-900 mb-4">📚 Ressources</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started" target="_blank" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                                <svg class="w-5 h-5 text-primary-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                </svg>
-                                Documentation WhatsApp API
-                            </a>
-                            <a href="https://developers.facebook.com/apps" target="_blank" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                                <svg class="w-5 h-5 text-primary-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                </svg>
-                                Mes applications Meta
-                            </a>
+                            @endif
                         </div>
                     </div>
+                </div>
+            @else
+                <!-- Assistant de Connexion -->
+                <div class="mb-8" data-aos="fade-up">
+                    <div class="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-2xl p-6 sm:p-8 border-2 border-primary-200 shadow-xl mb-6">
+                        <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 flex items-center">
+                            <i class="fab fa-whatsapp text-green-600 mr-3 text-3xl"></i>
+                            Connecter WhatsApp Business
+                        </h3>
+                        <p class="text-base sm:text-lg text-gray-700 mb-4">
+                            Suis notre assistant pas-à-pas pour connecter ton WhatsApp Business en moins de 5 minutes.
+                        </p>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-clock text-primary-600"></i>
+                            <span>⏱️ Temps estimé : 5 minutes</span>
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-shield-alt text-primary-600"></i>
+                            <span>🔒 100% sécurisé</span>
+                        </div>
+                    </div>
+
+                    <!-- Assistant Interactif -->
+                    <div x-data="{ step: 1, totalSteps: 4 }" class="space-y-6">
+                        <!-- Étape 1 : Créer l'app Meta -->
+                        <div x-show="step === 1" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform translate-x-10"
+                             x-transition:enter-end="opacity-100 transform translate-x-0"
+                             class="bg-gradient-to-br from-primary-50 to-primary-100 border-2 border-primary-300 rounded-2xl p-6 sm:p-8 shadow-xl" 
+                             data-aos="fade-right">
+                            <div class="flex items-start mb-6">
+                                <div class="flex-shrink-0 bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 shadow-lg animate-pulse-glow">
+                                    1
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 flex items-center">
+                                        <i class="fab fa-meta text-primary-600 mr-2 text-2xl"></i>
+                                        Créer une Application Meta
+                                    </h4>
+                                    <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                        Tu dois créer une application Meta pour accéder à WhatsApp Business API.
+                                    </p>
+                                    <ol class="list-decimal list-inside space-y-3 text-sm sm:text-base text-gray-700 mb-6 bg-white/60 rounded-xl p-4">
+                                        <li>Va sur <a href="https://developers.facebook.com" target="_blank" class="text-primary-600 hover:text-primary-700 font-bold underline">Meta Developers</a></li>
+                                        <li>Clique sur <strong>"Mes applications"</strong> puis <strong>"Créer une application"</strong></li>
+                                        <li>Choisis le type <strong>"Business"</strong></li>
+                                        <li>Remplis les informations et clique sur <strong>"Créer"</strong></li>
+                                    </ol>
+                                    <a href="https://developers.facebook.com/apps/create" target="_blank" 
+                                       class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105">
+                                        <i class="fab fa-meta mr-2"></i>
+                                        Créer l'application Meta
+                                        <i class="fas fa-external-link-alt ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <button @click="step = 2" 
+                                        class="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105">
+                                    Suivant <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Étape 2 : Ajouter WhatsApp -->
+                        <div x-show="step === 2" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform translate-x-10"
+                             x-transition:enter-end="opacity-100 transform translate-x-0"
+                             class="bg-gradient-to-br from-secondary-50 to-secondary-100 border-2 border-secondary-300 rounded-2xl p-6 sm:p-8 shadow-xl" 
+                             data-aos="fade-right">
+                            <div class="flex items-start mb-6">
+                                <div class="flex-shrink-0 bg-gradient-to-br from-secondary-600 to-secondary-700 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 shadow-lg animate-pulse-glow">
+                                    2
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 flex items-center">
+                                        <i class="fab fa-whatsapp text-green-600 mr-2 text-2xl"></i>
+                                        Ajouter WhatsApp à l'application
+                                    </h4>
+                                    <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                        Une fois l'application créée, ajoute le produit WhatsApp.
+                                    </p>
+                                    <ol class="list-decimal list-inside space-y-3 text-sm sm:text-base text-gray-700 mb-6 bg-white/60 rounded-xl p-4">
+                                        <li>Dans le dashboard de ton application, cherche <strong>"Ajouter un produit"</strong></li>
+                                        <li>Trouve <strong>"WhatsApp"</strong> dans la liste</li>
+                                        <li>Clique sur <strong>"Configurer"</strong> à côté de WhatsApp</li>
+                                        <li>Clique sur <strong>"Commencer"</strong> ou <strong>"Get Started"</strong></li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <button @click="step = 1" 
+                                        class="px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-all duration-300">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Précédent
+                                </button>
+                                <button @click="step = 3" 
+                                        class="px-6 py-3 bg-gradient-to-r from-secondary-600 to-secondary-700 text-white font-bold rounded-xl hover:from-secondary-700 hover:to-secondary-800 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105">
+                                    Suivant <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Étape 3 : Récupérer les Credentials -->
+                        <div x-show="step === 3" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform translate-x-10"
+                             x-transition:enter-end="opacity-100 transform translate-x-0"
+                             class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-6 sm:p-8 shadow-xl" 
+                             data-aos="fade-right">
+                            <div class="flex items-start mb-6">
+                                <div class="flex-shrink-0 bg-gradient-to-br from-green-600 to-green-700 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 shadow-lg animate-pulse-glow">
+                                    3
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 flex items-center">
+                                        <i class="fas fa-key text-green-600 mr-2 text-2xl"></i>
+                                        Récupérer les Credentials
+                                    </h4>
+                                    <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                        Copie ces informations depuis Meta Developers.
+                                    </p>
+                                    <ol class="list-decimal list-inside space-y-3 text-sm sm:text-base text-gray-700 mb-6 bg-white/60 rounded-xl p-4">
+                                        <li>Dans le menu de gauche, clique sur <strong>"API Setup"</strong> ou <strong>"Configuration API"</strong></li>
+                                        <li>Copie le <strong>"Phone number ID"</strong></li>
+                                        <li>Copie le <strong>"WhatsApp Business Account ID"</strong></li>
+                                        <li>Copie le <strong>"Temporary access token"</strong> (commence par EAA...)</li>
+                                    </ol>
+                                    <div class="bg-white rounded-xl p-4 border-2 border-green-200 shadow-md">
+                                        <p class="text-sm text-gray-700 flex items-center">
+                                            <i class="fas fa-lightbulb text-yellow-500 mr-2 text-lg"></i>
+                                            <strong>💡 Astuce :</strong> Ouvre Meta Developers dans un autre onglet pour copier ces informations facilement
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <button @click="step = 2" 
+                                        class="px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-all duration-300">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Précédent
+                                </button>
+                                <button @click="step = 4" 
+                                        class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105">
+                                    Suivant <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Étape 4 : Entrer les Credentials -->
+                        <div x-show="step === 4" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform translate-x-10"
+                             x-transition:enter-end="opacity-100 transform translate-x-0"
+                             class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-6 sm:p-8 shadow-xl" 
+                             data-aos="fade-right">
+                            <div class="flex items-start mb-6">
+                                <div class="flex-shrink-0 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 shadow-lg animate-pulse-glow">
+                                    4
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                                        <i class="fas fa-paper-plane text-blue-600 mr-2 text-2xl"></i>
+                                        Entrer les Credentials
+                                    </h4>
+                                    
+                                    <!-- Formulaire -->
+                                    <form method="POST" action="{{ route('dashboard.whatsapp.store') }}" class="space-y-5">
+                                        @csrf
+
+                                        <div>
+                                            <label for="phone_number_id" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                                <i class="fas fa-mobile-alt text-primary-600 mr-2"></i>
+                                                Phone Number ID *
+                                            </label>
+                                            <input type="text" name="phone_number_id" id="phone_number_id" value="{{ old('phone_number_id', $connection->phone_number_id ?? '') }}" required
+                                                   placeholder="Ex: 123456789012345"
+                                                   class="w-full rounded-xl border-2 border-gray-300 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all py-3 px-4">
+                                            @error('phone_number_id')
+                                                <p class="mt-1 text-sm text-red-600 flex items-center">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label for="whatsapp_business_account_id" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                                <i class="fas fa-building text-primary-600 mr-2"></i>
+                                                WhatsApp Business Account ID *
+                                            </label>
+                                            <input type="text" name="whatsapp_business_account_id" id="whatsapp_business_account_id" value="{{ old('whatsapp_business_account_id', $connection->whatsapp_business_account_id ?? '') }}" required
+                                                   placeholder="Ex: 987654321098765"
+                                                   class="w-full rounded-xl border-2 border-gray-300 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all py-3 px-4">
+                                            @error('whatsapp_business_account_id')
+                                                <p class="mt-1 text-sm text-red-600 flex items-center">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label for="access_token" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                                <i class="fas fa-key text-primary-600 mr-2"></i>
+                                                Access Token (Temporaire) *
+                                            </label>
+                                            <textarea name="access_token" id="access_token" rows="4" required
+                                                      placeholder="EAAxxxxxxxxxxxxx..."
+                                                      class="w-full rounded-xl border-2 border-gray-300 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all py-3 px-4">{{ old('access_token', $connection->access_token ?? '') }}</textarea>
+                                            @error('access_token')
+                                                <p class="mt-1 text-sm text-red-600 flex items-center">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+                                            <p class="mt-2 text-xs text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start">
+                                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-2 mt-0.5"></i>
+                                                <span>⚠️ Ce token expire après 24h. Pour la production, tu devras créer un token permanent.</span>
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label for="phone_number" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                                <i class="fas fa-phone text-primary-600 mr-2"></i>
+                                                Numéro de téléphone (optionnel)
+                                            </label>
+                                            <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $connection->phone_number ?? '') }}"
+                                                   placeholder="+33 6 12 34 56 78"
+                                                   class="w-full rounded-xl border-2 border-gray-300 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-200 transition-all py-3 px-4">
+                                        </div>
+
+                                        <div class="flex justify-between pt-4">
+                                            <button type="button" @click="step = 3" 
+                                                    class="px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-all duration-300">
+                                                <i class="fas fa-arrow-left mr-2"></i>
+                                                Précédent
+                                            </button>
+                                            <button type="submit" 
+                                                    class="px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105">
+                                                <i class="fab fa-whatsapp mr-2"></i>
+                                                ✅ Connecter WhatsApp
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Documentation -->
+            <div class="mt-8 border-t-2 border-gray-200 pt-6" data-aos="fade-up">
+                <h4 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-book text-primary-600 mr-2"></i>
+                    📚 Ressources
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started" target="_blank" 
+                       class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="bg-primary-100 rounded-lg p-3 mr-4">
+                            <i class="fas fa-book text-primary-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-900">Documentation WhatsApp API</p>
+                            <p class="text-xs text-gray-500">Guide complet d'intégration</p>
+                        </div>
+                        <i class="fas fa-external-link-alt text-primary-600"></i>
+                    </a>
+                    <a href="https://developers.facebook.com/apps" target="_blank" 
+                       class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="bg-primary-100 rounded-lg p-3 mr-4">
+                            <i class="fab fa-meta text-primary-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-900">Mes applications Meta</p>
+                            <p class="text-xs text-gray-500">Gérer vos applications</p>
+                        </div>
+                        <i class="fas fa-external-link-alt text-primary-600"></i>
+                    </a>
                 </div>
             </div>
         </div>

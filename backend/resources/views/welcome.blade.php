@@ -13,7 +13,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/react-app.jsx'])
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         
         <!-- Font Awesome Icons -->
@@ -308,20 +308,24 @@
     </head>
     <body class="font-sans antialiased bg-white" x-data="{ activeTab: 'comments' }" onload="AOS.init({ duration: 1000, once: true, offset: 100 })">
         <!-- Navigation -->
-        <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <nav class="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
+                <div class="flex justify-between items-center h-16 sm:h-20">
                     <div class="flex items-center">
-                        <a href="{{ route('welcome') }}" class="flex items-center">
-                            <x-app-logo class="h-8 sm:h-10" />
+                        <a href="{{ route('welcome') }}" class="flex items-center group">
+                            <x-app-logo class="h-8 sm:h-10 transition-transform duration-300 group-hover:scale-110" />
                         </a>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            Connexion
+                    <div class="flex items-center space-x-2 sm:space-x-4">
+                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm sm:text-base font-medium transition-colors duration-200">
+                            <i class="fas fa-sign-in-alt mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Connexion</span>
+                            <span class="sm:hidden">Connexion</span>
                         </a>
-                        <a href="{{ route('register') }}" class="bg-primary-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-700 transition">
-                            Commencer gratuitement
+                        <a href="{{ route('register') }}" class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                            <i class="fas fa-rocket mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Commencer gratuitement</span>
+                            <span class="sm:hidden">Commencer</span>
                         </a>
                     </div>
                 </div>
@@ -329,7 +333,7 @@
         </nav>
 
         <!-- Hero Section -->
-        <section class="relative bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-20 lg:py-32 overflow-hidden">
+        <section class="relative bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-12 sm:py-16 lg:py-24 xl:py-32 overflow-hidden min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] flex items-center">
             <!-- Animated Background Particles -->
             <div class="absolute inset-0 overflow-hidden pointer-events-none">
                 <canvas id="particles-canvas" class="absolute inset-0 w-full h-full"></canvas>
@@ -340,86 +344,48 @@
                     <div class="absolute bottom-40 right-1/3 w-3 h-3 bg-primary-300 rounded-full animate-float opacity-30" style="animation-delay: 3s;"></div>
                     <div class="absolute top-1/2 left-1/3 w-2 h-2 bg-secondary-300 rounded-full animate-float opacity-40" style="animation-delay: 4s;"></div>
                 </div>
-                <!-- Animated Social Media Icons - Moving around the entire section -->
+                <!-- Animated Social Media Icons - Hidden on mobile, visible on larger screens -->
                 <!-- Left side icons -->
-                <div class="absolute top-1/4 left-1/4 w-16 h-16 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround 20s ease-in-out infinite;">
+                <div class="hidden md:block absolute top-1/4 left-1/4 w-12 h-12 lg:w-16 lg:h-16 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround 20s ease-in-out infinite;">
                     <div class="w-full h-full bg-green-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-green-400">
-                        <svg class="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                        </svg>
+                        <i class="fab fa-whatsapp text-white text-lg lg:text-2xl"></i>
                     </div>
                 </div>
-                <div class="absolute bottom-1/4 left-1/3 w-14 h-14 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround3 22s ease-in-out infinite;">
+                <div class="hidden md:block absolute bottom-1/4 left-1/3 w-10 h-10 lg:w-14 lg:h-14 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround3 22s ease-in-out infinite;">
                     <div class="w-full h-full bg-blue-400 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-blue-300">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.9 4.9 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                        </svg>
+                        <i class="fab fa-twitter text-white text-base lg:text-xl"></i>
                     </div>
                 </div>
                 
                 <!-- Right side icons -->
-                <div class="absolute top-1/3 right-1/4 w-16 h-16 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround2 25s ease-in-out infinite;">
+                <div class="hidden md:block absolute top-1/3 right-1/4 w-12 h-12 lg:w-16 lg:h-16 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround2 25s ease-in-out infinite;">
                     <div class="w-full h-full bg-blue-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-blue-500">
-                        <svg class="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
+                        <i class="fab fa-facebook text-white text-lg lg:text-2xl"></i>
                     </div>
                 </div>
-                <div class="absolute bottom-1/3 right-1/3 w-15 h-15 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround4 18s ease-in-out infinite;">
+                <div class="hidden md:block absolute bottom-1/3 right-1/3 w-11 h-11 lg:w-15 lg:h-15 opacity-70 hover:opacity-100 transition-opacity z-0" style="animation: floatAround4 18s ease-in-out infinite;">
                     <div class="w-full h-full bg-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-purple-500">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.057-1.274-.07-1.649-.07-4.844 0-3.196.016-3.586.074-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.44 1.44-1.44.793-.001 1.44.645 1.44 1.44z"/>
-                        </svg>
-                    </div>
-                </div>
-                
-                <!-- Center/Middle icons (behind the text) -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-14 h-14 opacity-50 hover:opacity-100 transition-opacity z-0" style="animation: floatAround5 24s ease-in-out infinite;">
-                    <div class="w-full h-full bg-green-400 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-green-300">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="absolute top-2/5 left-2/5 w-13 h-13 opacity-50 hover:opacity-100 transition-opacity z-0" style="animation: floatAround6 21s ease-in-out infinite;">
-                    <div class="w-full h-full bg-blue-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-blue-400">
-                        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="absolute bottom-2/5 right-2/5 w-14 h-14 opacity-50 hover:opacity-100 transition-opacity z-0" style="animation: floatAround7 23s ease-in-out infinite;">
-                    <div class="w-full h-full bg-purple-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-purple-400">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.057-1.274-.07-1.649-.07-4.844 0-3.196.016-3.586.074-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.44 1.44-1.44.793-.001 1.44.645 1.44 1.44z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="absolute top-3/5 right-3/5 w-13 h-13 opacity-50 hover:opacity-100 transition-opacity z-0" style="animation: floatAround8 19s ease-in-out infinite;">
-                    <div class="w-full h-full bg-green-300 rounded-full flex items-center justify-center shadow-2xl hover:scale-125 transition-transform border-2 border-green-200">
-                        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.9 4.9 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                        </svg>
+                        <i class="fab fa-instagram text-white text-base lg:text-xl"></i>
                     </div>
                 </div>
             </div>
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
                 <div class="text-center">
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-                        <span id="typewriter-text" class="text-primary-600"></span>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6" data-aos="fade-up">
+                        <span id="typewriter-text" class="text-primary-600 block sm:inline"></span>
                         <span class="cursor-blink">|</span>
                     </h1>
-                    <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                    <p class="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto px-4" data-aos="fade-up" data-aos-delay="200">
                         Voicy Assistant transcrit, résume et répond automatiquement à vos messages vocaux WhatsApp Business grâce à l'intelligence artificielle.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white text-lg font-semibold rounded-lg hover:bg-primary-700 transition shadow-lg hover:shadow-xl">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4" data-aos="fade-up" data-aos-delay="400">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-base sm:text-lg font-semibold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto">
+                            <i class="fas fa-rocket mr-2"></i>
                             Essayer gratuitement
-                            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                            </svg>
+                            <i class="fas fa-arrow-right ml-2"></i>
                         </a>
-                        <a href="#features" class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 text-lg font-semibold rounded-lg border-2 border-gray-300 hover:border-primary-500 hover:text-primary-600 transition">
+                        <a href="#features" class="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-700 text-base sm:text-lg font-semibold rounded-lg border-2 border-gray-300 hover:border-primary-500 hover:text-primary-600 transition-all duration-300 w-full sm:w-auto">
+                            <i class="fas fa-info-circle mr-2"></i>
                             En savoir plus
                         </a>
                     </div>
@@ -428,53 +394,48 @@
         </section>
 
         <!-- Features Section -->
-        <section id="features" class="py-20 bg-white">
+        <section id="features" class="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white via-primary-50/30 to-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <div class="text-center mb-10 sm:mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+                        <i class="fas fa-star text-primary-600 mr-2"></i>
                         Fonctionnalités puissantes
                     </h2>
-                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                         Tout ce dont vous avez besoin pour automatiser vos messages vocaux WhatsApp
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     <!-- Feature 1 -->
-                    <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 border border-primary-200">
-                        <div class="bg-primary-600 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                            </svg>
+                    <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-primary-200 transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:-translate-y-2 group" data-aos="fade-up" data-aos-delay="0">
+                        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mb-4 sm:mb-6 shadow-lg transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-microphone-alt text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Transcription automatique</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Transcription automatique</h3>
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
                             Vos messages vocaux sont automatiquement transcrits avec une précision de 99% grâce à l'IA Whisper.
                         </p>
                     </div>
 
                     <!-- Feature 2 -->
-                    <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-xl p-8 border border-secondary-200">
-                        <div class="bg-secondary-600 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                    <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-secondary-200 transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:-translate-y-2 group" data-aos="fade-up" data-aos-delay="200">
+                        <div class="bg-gradient-to-br from-secondary-600 to-secondary-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mb-4 sm:mb-6 shadow-lg transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-file-alt text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Résumé intelligent</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Résumé intelligent</h3>
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
                             Chaque vocal est résumé en 3 lignes et les actions importantes sont automatiquement extraites.
                         </p>
                     </div>
 
                     <!-- Feature 3 -->
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 border border-green-200">
-                        <div class="bg-green-600 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                            </svg>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-green-200 transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:-translate-y-2 group" data-aos="fade-up" data-aos-delay="400">
+                        <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mb-4 sm:mb-6 shadow-lg transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-comments text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Réponses automatiques</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Réponses automatiques</h3>
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
                             Recevez des réponses professionnelles générées par IA, prêtes à être envoyées ou personnalisées.
                         </p>
                     </div>
@@ -483,47 +444,48 @@
         </section>
 
         <!-- How it works -->
-        <section class="py-20 bg-gray-50">
+        <section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 via-white to-primary-50/20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <div class="text-center mb-10 sm:mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+                        <i class="fas fa-cogs text-secondary-600 mr-2"></i>
                         Comment ça fonctionne ?
                     </h2>
-                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                         En 3 étapes simples, automatisez vos messages vocaux
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
                     <!-- Step 1 -->
-                    <div class="text-center">
-                        <div class="bg-primary-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                            1
+                    <div class="text-center group" data-aos="fade-up" data-aos-delay="0">
+                        <div class="bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6 shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-plug"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Connectez WhatsApp</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Connectez WhatsApp</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-4">
                             Connectez votre compte WhatsApp Business en quelques clics via Meta Developers.
                         </p>
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="text-center">
-                        <div class="bg-secondary-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                            2
+                    <div class="text-center group" data-aos="fade-up" data-aos-delay="200">
+                        <div class="bg-gradient-to-br from-secondary-600 to-secondary-700 text-white rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6 shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-inbox"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Recevez des vocaux</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Recevez des vocaux</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-4">
                             Vos messages vocaux sont automatiquement capturés et traités en temps réel.
                         </p>
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="text-center">
-                        <div class="bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                            3
+                    <div class="text-center group" data-aos="fade-up" data-aos-delay="400">
+                        <div class="bg-gradient-to-br from-green-600 to-green-700 text-white rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6 shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-check-circle"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Obtenez les réponses</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Obtenez les réponses</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-4">
                             Consultez les transcriptions, résumés et réponses suggérées dans votre dashboard.
                         </p>
                     </div>
@@ -532,18 +494,19 @@
         </section>
 
         <!-- Pricing Section -->
-        <section id="pricing" class="py-20 bg-white">
+        <section id="pricing" class="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white via-secondary-50/30 to-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <div class="text-center mb-10 sm:mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+                        <i class="fas fa-tags text-secondary-600 mr-2"></i>
                         Tarifs simples et transparents
                     </h2>
-                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                         Choisissez le plan qui correspond à vos besoins
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
                     @php
                         try {
                             $plans = \App\Models\Plan::where('is_active', true)->get();
@@ -576,46 +539,43 @@
                             ]);
                         }
                     @endphp
-                    @foreach($plans as $plan)
-                        <div class="bg-white border-2 rounded-xl p-8 {{ $plan->name === 'Starter' ? 'border-primary-500 shadow-lg scale-105' : 'border-gray-200' }}">
+                    @foreach($plans as $index => $plan)
+                        <div class="bg-white border-2 rounded-xl sm:rounded-2xl p-6 sm:p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 {{ $plan->name === 'Starter' ? 'border-primary-500 shadow-xl scale-105 sm:scale-110' : 'border-gray-200 hover:border-primary-300' }}" data-aos="fade-up" data-aos-delay="{{ $index * 100 }}">
                             @if($plan->name === 'Starter')
-                                <div class="bg-primary-600 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">
+                                <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full inline-block mb-4 shadow-md">
+                                    <i class="fas fa-star mr-1"></i>
                                     POPULAIRE
                                 </div>
                             @endif
-                            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
-                            <div class="mb-4">
-                                <span class="text-4xl font-bold text-gray-900">{{ number_format($plan->price_monthly, 0) }}€</span>
-                                <span class="text-gray-600">/mois</span>
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-crown text-2xl sm:text-3xl {{ $plan->name === 'Starter' ? 'text-primary-600' : 'text-gray-400' }} mr-2"></i>
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-900">{{ $plan->name }}</h3>
                             </div>
-                            <p class="text-gray-600 mb-6">{{ $plan->description }}</p>
-                            <ul class="space-y-3 mb-8">
-                                <li class="flex items-center">
-                                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                            <div class="mb-4 sm:mb-6">
+                                <span class="text-3xl sm:text-4xl font-bold text-gray-900">{{ number_format($plan->price_monthly, 0) }}€</span>
+                                <span class="text-gray-600 text-sm sm:text-base">/mois</span>
+                            </div>
+                            <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">{{ $plan->description }}</p>
+                            <ul class="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+                                <li class="flex items-center text-sm sm:text-base">
+                                    <i class="fas fa-check-circle text-green-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
                                     <span class="text-gray-700">{{ number_format($plan->allowed_audio_per_month) }} audios/mois</span>
                                 </li>
-                                <li class="flex items-center">
-                                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                <li class="flex items-center text-sm sm:text-base">
+                                    <i class="fas fa-check-circle text-green-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
                                     <span class="text-gray-700">Jusqu'à {{ $plan->allowed_audio_per_minute_length }} min/audio</span>
                                 </li>
-                                <li class="flex items-center">
-                                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                <li class="flex items-center text-sm sm:text-base">
+                                    <i class="fas fa-check-circle text-green-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
                                     <span class="text-gray-700">Transcription automatique</span>
                                 </li>
-                                <li class="flex items-center">
-                                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                <li class="flex items-center text-sm sm:text-base">
+                                    <i class="fas fa-check-circle text-green-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
                                     <span class="text-gray-700">Résumé intelligent</span>
                                 </li>
                             </ul>
-                            <a href="{{ route('register') }}" class="block w-full text-center px-6 py-3 {{ $plan->name === 'Starter' ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900' }} rounded-lg font-semibold transition">
+                            <a href="{{ route('register') }}" class="block w-full text-center px-4 sm:px-6 py-2.5 sm:py-3 {{ $plan->name === 'Starter' ? 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-900' }} rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-arrow-right mr-2"></i>
                                 Commencer
                             </a>
                         </div>
@@ -625,13 +585,14 @@
         </section>
 
         <!-- Comments Section -->
-        <section class="py-20 bg-white">
+        <section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white via-primary-50/20 to-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <div class="text-center mb-10 sm:mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+                        <i class="fas fa-comments text-primary-600 mr-2"></i>
                         Témoignages
                     </h2>
-                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                         Découvrez ce que nos utilisateurs pensent de Voicy Assistant et partagez votre propre expérience
                     </p>
                 </div>
@@ -648,7 +609,7 @@
                     </div>
                 @endif
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                     <!-- Comment Form -->
                     <div class="order-2 lg:order-1" x-data="{ submitted: false }">
                         <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 border border-primary-200">
@@ -827,74 +788,70 @@
         </section>
 
         <!-- Contact Section -->
-        <section class="py-20 bg-gray-50">
+        <section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 via-white to-secondary-50/20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <div class="text-center mb-10 sm:mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+                        <i class="fas fa-envelope text-primary-600 mr-2"></i>
                         Contactez-nous
                     </h2>
-                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                         Une question ? Une suggestion ? Notre équipe est là pour vous aider
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-10 sm:mb-12 lg:mb-16">
                     <!-- Email Card -->
-                    <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 border border-primary-200 text-center">
-                        <div class="bg-primary-600 rounded-lg w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
+                    <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-primary-200 text-center transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="0">
+                        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-envelope text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Email</h3>
-                        <p class="text-gray-600 mb-4">support@voicyassistant.com</p>
-                        <a href="mailto:support@voicyassistant.com" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Email</h3>
+                        <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">support@voicyassistant.com</p>
+                        <a href="mailto:support@voicyassistant.com" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors inline-flex items-center">
+                            <i class="fas fa-paper-plane mr-2"></i>
                             Envoyer un email
                         </a>
                     </div>
 
                     <!-- Response Time Card -->
-                    <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-xl p-8 border border-secondary-200 text-center">
-                        <div class="bg-secondary-600 rounded-lg w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                    <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-secondary-200 text-center transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
+                        <div class="bg-gradient-to-br from-secondary-600 to-secondary-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-clock text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Réponse rapide</h3>
-                        <p class="text-gray-600 mb-4">Sous 24-48h</p>
-                        <p class="text-gray-500 text-sm">Nous nous engageons à répondre rapidement</p>
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Réponse rapide</h3>
+                        <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Sous 24-48h</p>
+                        <p class="text-xs sm:text-sm text-gray-500">Nous nous engageons à répondre rapidement</p>
                     </div>
 
                     <!-- Support Card -->
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 border border-green-200 text-center">
-                        <div class="bg-green-600 rounded-lg w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-green-200 text-center transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 sm:col-span-2 lg:col-span-1" data-aos="fade-up" data-aos-delay="400">
+                        <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-headset text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Support 7j/7</h3>
-                        <p class="text-gray-600 mb-4">Disponible en permanence</p>
-                        <p class="text-gray-500 text-sm">Notre équipe est disponible pour vous aider</p>
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Support 7j/7</h3>
+                        <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Disponible en permanence</p>
+                        <p class="text-xs sm:text-sm text-gray-500">Notre équipe est disponible pour vous aider</p>
                     </div>
                 </div>
 
                 <!-- CTA Button -->
-                <div class="text-center mt-12">
+                <div class="text-center mt-8 sm:mt-12" data-aos="fade-up">
                     <a 
                         href="{{ route('contact.show') }}" 
-                        class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white text-lg font-semibold rounded-lg hover:bg-primary-700 transition shadow-lg hover:shadow-xl"
+                        class="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-base sm:text-lg font-semibold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
-                        Accéder au formulaire de contact
-                        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        <span class="hidden sm:inline">Accéder au formulaire de contact</span>
+                        <span class="sm:hidden">Formulaire de contact</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
             </div>
         </section>
 
         <!-- Newsletter Section -->
-        <section class="py-20 bg-white">
+        <section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-primary-50 via-white to-secondary-50/30">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Success Message -->
                 @if (session('success') && request()->routeIs('welcome') && !str_contains(session('success'), 'commentaire'))
@@ -933,18 +890,16 @@
                 @endif
 
                 <!-- Main Content -->
-                <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 border border-primary-200" x-data="{ submitted: false }">
+                <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-10 border border-primary-200 shadow-lg" x-data="{ submitted: false }" data-aos="fade-up">
                     <!-- Header -->
-                    <div class="text-center mb-8">
-                        <div class="bg-primary-600 rounded-lg w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
+                    <div class="text-center mb-6 sm:mb-8">
+                        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-envelope-open-text text-white text-xl sm:text-2xl"></i>
                         </div>
-                        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
                             Restez informé
                         </h2>
-                        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                        <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                             Recevez nos actualités et conseils exclusifs directement dans votre boîte mail
                         </p>
                     </div>
@@ -1004,27 +959,33 @@
         </section>
 
         <!-- CTA Section -->
-        <section class="py-20 bg-gradient-to-br from-primary-600 to-primary-700">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
+        <section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 relative overflow-hidden">
+            <!-- Animated background elements -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-10 left-10 w-32 h-32 bg-white rounded-full animate-float"></div>
+                <div class="absolute bottom-10 right-10 w-24 h-24 bg-white rounded-full animate-float" style="animation-delay: 1s;"></div>
+                <div class="absolute top-1/2 left-1/2 w-20 h-20 bg-white rounded-full animate-float" style="animation-delay: 2s;"></div>
+            </div>
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4" data-aos="fade-up">
+                    <i class="fas fa-rocket mr-2"></i>
                     Prêt à gagner du temps ?
                 </h2>
-                <p class="text-xl text-primary-100 mb-8">
+                <p class="text-base sm:text-lg lg:text-xl text-primary-100 mb-6 sm:mb-8 px-4" data-aos="fade-up" data-aos-delay="100">
                     Rejoignez des centaines de professionnels qui automatisent déjà leurs messages vocaux
                 </p>
-                <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 text-lg font-semibold rounded-lg hover:bg-gray-50 transition shadow-lg hover:shadow-xl">
+                <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-primary-600 text-base sm:text-lg font-semibold rounded-lg hover:bg-gray-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105" data-aos="fade-up" data-aos-delay="200">
+                    <i class="fas fa-rocket mr-2"></i>
                     Commencer gratuitement
-                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                    </svg>
+                    <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
         </section>
 
         <!-- Footer -->
-        <footer class="bg-gray-900 text-gray-300 py-12">
+        <footer class="bg-gray-900 text-gray-300 py-8 sm:py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                     <!-- Logo et description -->
                     <div class="min-w-0">
                         <div class="mb-4">
