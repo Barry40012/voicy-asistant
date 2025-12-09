@@ -349,7 +349,6 @@
                     </div>
                     
                     <!-- Analytics Section -->
-                    @if(isset($totalAudios) && $totalAudios > 0)
                     <div class="mb-8 bg-white rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden" data-aos="fade-up">
                         <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-6 py-4">
                             <h3 class="text-xl font-bold text-white flex items-center">
@@ -389,7 +388,16 @@
                                         Activité (30 derniers jours)
                                     </h4>
                                     <div style="height: 150px; position: relative;">
-                                        <canvas id="audiosByDayChart"></canvas>
+                                        @if(isset($audiosByDay) && !empty($audiosByDay))
+                                            <canvas id="audiosByDayChart"></canvas>
+                                        @else
+                                            <div class="flex items-center justify-center h-full text-gray-400">
+                                                <div class="text-center">
+                                                    <i class="fas fa-chart-line text-4xl mb-2"></i>
+                                                    <p class="text-sm">Pas encore de données</p>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 
@@ -400,7 +408,16 @@
                                         Répartition par statut
                                     </h4>
                                     <div style="height: 150px; position: relative;">
-                                        <canvas id="audiosByStatusChart"></canvas>
+                                        @if(isset($audiosByStatus) && !empty($audiosByStatus))
+                                            <canvas id="audiosByStatusChart"></canvas>
+                                        @else
+                                            <div class="flex items-center justify-center h-full text-gray-400">
+                                                <div class="text-center">
+                                                    <i class="fas fa-pie-chart text-4xl mb-2"></i>
+                                                    <p class="text-sm">Pas encore de données</p>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 
@@ -454,7 +471,6 @@
                             </div>
                         </div>
                     </div>
-                    @endif
                     
                     <!-- Actions rapides -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -528,7 +544,6 @@
         @endif
     </script>
     
-    @if(isset($totalAudios) && $totalAudios > 0)
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
@@ -691,6 +706,5 @@
         }
         @endif
     </script>
-    @endif
 </x-app-layout>
 

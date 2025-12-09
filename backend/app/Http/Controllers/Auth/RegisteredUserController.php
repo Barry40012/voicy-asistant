@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Services\NotificationService;
 
 class RegisteredUserController extends Controller
 {
@@ -47,6 +48,18 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Create welcome notification for new user
+        $notificationService = app(NotificationService::class);
+        $notificationService->create(
+            $user,
+            'welcome',
+            'Bienvenue sur Voicy Assistant ! 🎉',
+            'Merci de nous rejoindre ! Commencez par connecter votre compte WhatsApp Business pour automatiser vos messages vocaux.',
+            'success',
+            route('dashboard.whatsapp.index'),
+            []
+        );
 
         return redirect(RouteServiceProvider::HOME);
     }

@@ -456,5 +456,7 @@
                 }
             });
         </script>
+        <!-- Cookie Consent Banner -->
+        <x-cookie-banner />
     </body>
 </html>

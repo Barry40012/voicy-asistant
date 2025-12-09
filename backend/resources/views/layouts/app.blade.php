@@ -164,6 +164,14 @@
             </div>
         </div>
 
+        <!-- Session Timeout Warning -->
+        @auth
+            <x-session-timeout />
+        @endauth
+
+        <!-- Cookie Consent Banner -->
+        <x-cookie-banner />
+
         <script>
             // Animated particles background for dashboard
             document.addEventListener('DOMContentLoaded', function() {

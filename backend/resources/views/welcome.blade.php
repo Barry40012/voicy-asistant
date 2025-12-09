@@ -807,8 +807,8 @@
                             <i class="fas fa-envelope text-white text-xl sm:text-2xl"></i>
                         </div>
                         <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Email</h3>
-                        <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">support@voicyassistant.com</p>
-                        <a href="mailto:support@voicyassistant.com" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors inline-flex items-center">
+                        <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">{{ \App\Models\Setting::get('contact_email', 'info.voicyassistant@gmail.com') }}</p>
+                        <a href="mailto:{{ \App\Models\Setting::get('contact_email', 'info.voicyassistant@gmail.com') }}" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors inline-flex items-center">
                             <i class="fas fa-paper-plane mr-2"></i>
                             Envoyer un email
                         </a>

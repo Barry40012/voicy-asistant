@@ -311,7 +311,121 @@ class AdminController extends Controller
         $logoPath = Setting::get('logo_path');
         $logoUrl = $logoPath ? Storage::url($logoPath) : null;
         
-        return view('admin.settings', compact('logoUrl'));
+        // Load all settings grouped by category
+        $contactSettings = [
+            'contact_email' => Setting::get('contact_email', 'info.voicyassistant@gmail.com'),
+            'contact_phone' => Setting::get('contact_phone', ''),
+        ];
+        
+        $mailSettings = [
+            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'info.voicyassistant@gmail.com')),
+            'mail_from_name' => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Voicy Assistant')),
+            'mail_host' => Setting::get('mail_host', env('MAIL_HOST', 'smtp.gmail.com')),
+            'mail_port' => Setting::get('mail_port', env('MAIL_PORT', '587')),
+            'mail_username' => Setting::get('mail_username', env('MAIL_USERNAME', '')),
+            'mail_password' => Setting::get('mail_password', ''), // Will show as empty for security
+            'mail_encryption' => Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls')),
+        ];
+        
+        return view('admin.settings', compact('logoUrl', 'contactSettings', 'mailSettings'));
+    }
+    
+    /**
+     * Update settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            // Contact settings
+            'contact_email' => ['required', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:20'],
+            
+            // Mail settings
+            'mail_from_address' => ['required', 'email', 'max:255'],
+            'mail_from_name' => ['required', 'string', 'max:255'],
+            'mail_host' => ['required', 'string', 'max:255'],
+            'mail_port' => ['required', 'integer', 'min:1', 'max:65535'],
+            'mail_username' => ['required', 'email', 'max:255'],
+            'mail_password' => ['nullable', 'string', 'max:255'], // Optional - only update if provided
+            'mail_encryption' => ['required', 'string', 'in:tls,ssl'],
+        ]);
+        
+        // Update contact settings
+        Setting::set('contact_email', $request->contact_email);
+        Setting::set('contact_phone', $request->contact_phone ?? '');
+        
+        // Update mail settings
+        Setting::set('mail_from_address', $request->mail_from_address);
+        Setting::set('mail_from_name', $request->mail_from_name);
+        Setting::set('mail_host', $request->mail_host);
+        Setting::set('mail_port', $request->mail_port);
+        Setting::set('mail_username', $request->mail_username);
+        Setting::set('mail_encryption', $request->mail_encryption);
+        
+        // Only update password if provided
+        if ($request->filled('mail_password')) {
+            Setting::set('mail_password', $request->mail_password);
+        }
+        
+        // Update .env file dynamically (optional - for immediate effect)
+        // Note: This requires write permissions on .env file
+        try {
+            $this->updateEnvFile([
+                'MAIL_FROM_ADDRESS' => $request->mail_from_address,
+                'MAIL_FROM_NAME' => $request->mail_from_name,
+                'MAIL_HOST' => $request->mail_host,
+                'MAIL_PORT' => $request->mail_port,
+                'MAIL_USERNAME' => $request->mail_username,
+                'MAIL_ENCRYPTION' => $request->mail_encryption,
+            ]);
+            
+            if ($request->filled('mail_password')) {
+                $this->updateEnvFile(['MAIL_PASSWORD' => $request->mail_password]);
+            }
+        } catch (\Exception $e) {
+            // Log error but don't fail the request
+            \Log::warning('Could not update .env file: ' . $e->getMessage());
+        }
+        
+        // Clear config cache to apply new settings
+        \Artisan::call('config:clear');
+        
+        return redirect()->route('admin.settings')
+            ->with('success', 'Paramètres mis à jour avec succès. Les changements sont appliqués immédiatement.');
+    }
+    
+    /**
+     * Update .env file
+     */
+    private function updateEnvFile(array $data)
+    {
+        $envFile = base_path('.env');
+        
+        if (!file_exists($envFile)) {
+            return false;
+        }
+        
+        $envContent = file_get_contents($envFile);
+        
+        foreach ($data as $key => $value) {
+            // Escape special characters in value
+            $value = str_replace('$', '\$', $value);
+            
+            // Pattern to match the key=value line
+            $pattern = "/^{$key}=.*/m";
+            
+            if (preg_match($pattern, $envContent)) {
+                // Replace existing value
+                $envContent = preg_replace($pattern, "{$key}={$value}", $envContent);
+            } else {
+                // Add new key=value at the end
+                $envContent .= "\n{$key}={$value}";
+            }
+        }
+        
+        file_put_contents($envFile, $envContent);
+        
+        return true;
     }
 
     /**

@@ -71,6 +71,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Notifications
+    // Session keep-alive
+    Route::post('/api/session/keep-alive', [\App\Http\Controllers\SessionController::class, 'keepAlive'])->name('session.keep-alive');
+    
     Route::prefix('api/notifications')->name('notifications.')->group(function () {
         Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
         Route::get('/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount'])->name('unread-count');
@@ -119,6 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('permission:manage_admins')->group(function () {
             Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
             Route::post('/settings/logo', [AdminController::class, 'updateLogo'])->name('settings.logo');
+            Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
         });
         
         // Subscriptions management
